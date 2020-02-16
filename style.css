@@ -1,0 +1,16 @@
+body {
+    background-color: black;
+    color: white;
+}
+
+h1 {
+    font-family: Acme;
+    font-size: 175px;
+}
+
+p {
+    font-family: Monospace;
+    font-size: 38px;
+    margin: 20px;
+    padding: 20px;
+}
