@@ -29,7 +29,7 @@ body {
 
 .neon {
   font-family: neon;
-    align: center;
+  text-align: center;
   color: #FB4264;
   font-size: 9vw;
   line-height: 9vw;
@@ -116,7 +116,7 @@ body {
 .tabcontent {
   display: none;
   padding: 6px 12px;
-  border: 1px solid:fdeeppink;
+  border: 1px solid deeppink;
   border-top: none;
 }
 body {
@@ -198,7 +198,7 @@ function openCity(evt, cityName) {
   tablinks = document.getElementsByClassName("tablinks");
   for (i = 0; i < tablinks.length; i++) {
     tablinks[i].className = tablinks[i].className.replace(" active", "");
-    
+
   }
   document.getElementById(cityName).style.display = "block";
   evt.currentTarget.className += " active";
