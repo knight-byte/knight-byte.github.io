@@ -1,210 +1,543 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href="https://fonts.googleapis.com/css?family=Acme&amp;display=swap" rel="stylesheet"> 
-        <style>
-          html,
-body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
-  display: table;
-  background-color: black;
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Abunachar — DevSecOps & Cloud Infrastructure Engineer</title>
+<meta name="description" content="Abunachar is a DevSecOps engineer specializing in secure cloud infrastructure and security hardening. See projects, GitHub, and contact links.">
+<meta name="author" content="Abunachar">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://abunachar.com/">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://abunachar.com/">
+<meta property="og:title" content="Abunachar — DevSecOps & Cloud Infrastructure Engineer">
+<meta property="og:description" content="DevSecOps engineer specializing in secure cloud infrastructure and security hardening.">
+<meta property="og:image" content="https://github.com/knight-byte.png">
+<meta property="og:site_name" content="Abunachar">
+
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Abunachar — DevSecOps & Cloud Infrastructure Engineer">
+<meta name="twitter:description" content="DevSecOps engineer specializing in secure cloud infrastructure and security hardening.">
+<meta name="twitter:image" content="https://github.com/knight-byte.png">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Abunachar",
+  "url": "https://abunachar.com/",
+  "image": "https://github.com/knight-byte.png",
+  "jobTitle": "DevSecOps & Cloud Infrastructure Engineer",
+  "description": "DevSecOps engineer specializing in secure cloud infrastructure and security hardening.",
+  "email": "hello@abunachar.com",
+  "knowsAbout": [
+    "DevSecOps",
+    "Cloud Infrastructure",
+    "Docker",
+    "Container Orchestration",
+    "Security Hardening",
+    "Automation",
+    "Azure",
+    "GCP",
+    "CI/CD"
+  ],
+  "sameAs": [
+    "https://github.com/knight-byte",
+    "https://in.linkedin.com/in/abunachar",
+    "https://t.me/abunachar"
+  ]
+}
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+/* ============ REAL TERMINAL PALETTE (ANSI-mapped) ============ */
+:root{
+    --bg:#0c0d10;
+    --term:#15171c;
+    --chrome:#1b1d23;
+    --border:#2a2d35;
+    --fg:#cdd3de;
+    --muted:#666b78;
+
+    --ansi-green:#9ece6a;
+    --ansi-cyan:#7dcfba;
+    --ansi-yellow:#e0af68;
+    --ansi-red:#e06c75;
+    --ansi-blue:#7aa2f7;
+    --ansi-magenta:#bb9af7;
+
+    --gui-card:#13161b;
+    --gui-text:#e8eaed;
+    --gui-muted:#8b919d;
+    --gui-border:#262a32;
+    --gui-accent:#7dd3a8;
+}
+*{ margin:0; padding:0; box-sizing:border-box; }
+html,body{ height:100%; }
+body{
+    font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:var(--bg);
+    color:var(--fg);
+    padding:24px;
+    overflow:hidden;
+}
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    background:repeating-linear-gradient(
+        0deg, rgba(255,255,255,.012), rgba(255,255,255,.012) 1px,
+        transparent 1px, transparent 3px
+    );
 }
 
-@font-face {
-  font-family: neon;
-  src: url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/707108/neon.ttf);
+/* ============ SHARED WINDOW SHELL — same box for both modes ============ */
+.window{
+    position:relative;
+    width:620px;
+    max-width:100%;
+    height:520px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    box-shadow:0 30px 60px -20px rgba(0,0,0,.6);
+    overflow:hidden;
+    animation:rise .5s cubic-bezier(.2,.8,.2,1);
+    display:flex;
+    flex-direction:column;
+    background:var(--term);
 }
-.neoflux{
-  text-align: center;
-}
-.container {
-  display: table-cell;
-  
-  vertical-align: middle;
-}
+@keyframes rise{ from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:none;} }
 
-.neon {
-  font-family: neon;
-  text-align: center;
-  color: #FB4264;
-  font-size: 9vw;
-  line-height: 9vw;
-  text-shadow: 0 0 3vw #F40A35;
+.titlebar{
+    display:flex; align-items:center; gap:8px;
+    padding:12px 14px; background:var(--chrome);
+    border-bottom:1px solid var(--border); flex-shrink:0;
 }
+.dot{ width:11px; height:11px; border-radius:50%; background:#3a3d46; }
+.titlebar .dot:nth-child(1){ background:#e06c75; opacity:.55; }
+.titlebar .dot:nth-child(2){ background:#e0af68; opacity:.55; }
+.titlebar .dot:nth-child(3){ background:#9ece6a; opacity:.55; }
+.titlebar span.path{ margin-left:6px; font-size:.72rem; color:var(--muted); letter-spacing:.02em; }
 
-.flux {
-  font-family: neon;
-  color: #426DFB;
-  font-size: 9vw;
-  line-height: 9vw;
-  text-shadow: 0 0 3vw #2356FF;
+.toggle{
+    margin-left:auto; display:flex; align-items:center; gap:4px;
+    background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:2px;
 }
+.toggle button{
+    font-family:'JetBrains Mono',monospace; font-size:.66rem; letter-spacing:.03em; text-transform:uppercase;
+    padding:4px 9px; border-radius:4px; border:none; background:none;
+    color:var(--muted); cursor:pointer; transition:.15s;
+}
+.toggle button.active{ background:var(--ansi-cyan); color:#0c0d10; font-weight:700; }
 
-.neon {
-  animation: neon 1s ease infinite;
-  -moz-animation: neon 1s ease infinite;
-  -webkit-animation: neon 1s ease infinite;
+/* ============ TERMINAL BODY ============ */
+.screen{
+    padding:18px 22px; flex:1; overflow-y:auto;
+    font-size:.83rem; line-height:1.7; cursor:text;
 }
+.screen::-webkit-scrollbar{ width:8px; }
+.screen::-webkit-scrollbar-thumb{ background:var(--border); border-radius:4px; }
+.screen::-webkit-scrollbar-track{ background:transparent; }
 
-@keyframes neon {
-  0%,
-  100% {
-    text-shadow: 0 0 1vw #FA1C16, 0 0 3vw #FA1C16, 0 0 10vw #FA1C16, 0 0 10vw #FA1C16, 0 0 .4vw #FED128, .5vw .5vw .1vw #806914;
-    color: #FED128;
-  }
-  50% {
-    text-shadow: 0 0 .5vw #800E0B, 0 0 1.5vw #800E0B, 0 0 5vw #800E0B, 0 0 5vw #800E0B, 0 0 .2vw #800E0B, .5vw .5vw .1vw #40340A;
-    color: #806914;
-  }
-}
+.line{ white-space:pre-wrap; word-break:break-word; }
+.line.muted{ color:var(--muted); }
+.line.green{ color:var(--ansi-green); }
+.line.cyan{ color:var(--ansi-cyan); }
+.line.yellow{ color:var(--ansi-yellow); }
+.line.red{ color:var(--ansi-red); }
+.line.blue{ color:var(--ansi-blue); }
+.line.magenta{ color:var(--ansi-magenta); }
 
-.flux {
-  animation: flux 2s linear infinite;
-  -moz-animation: flux 2s linear infinite;
-  -webkit-animation: flux 2s linear infinite;
-  -o-animation: flux 2s linear infinite;
-}
+.identity{ display:flex; align-items:center; gap:14px; margin:10px 0 14px; }
+.avatar{ width:56px; height:56px; border-radius:8px; object-fit:cover; border:1px solid var(--border); flex-shrink:0; }
+.identity h1{ font-size:1.1rem; font-weight:700; color:var(--fg); }
+.identity .role{ margin-top:3px; font-size:.76rem; color:var(--muted); }
 
-@keyframes flux {
-  0%,
-  100% {
-    text-shadow: 0 0 1vw #1041FF, 0 0 3vw #1041FF, 0 0 10vw #1041FF, 0 0 10vw #1041FF, 0 0 .4vw #8BFDFE, .5vw .5vw .1vw #147280;
-    color: #28D7FE;
-  }
-  50% {
-    text-shadow: 0 0 .5vw #082180, 0 0 1.5vw #082180, 0 0 5vw #082180, 0 0 5vw #082180, 0 0 .2vw #082180, .5vw .5vw .1vw #0A3940;
-    color: #146C80;
-  }
+.status{
+    display:flex; align-items:center; gap:7px; margin:12px 0;
+    padding:9px 11px; background:rgba(158,206,106,.07);
+    border:1px solid rgba(158,206,106,.35); border-radius:6px;
+    font-size:.74rem; color:var(--ansi-green); width:fit-content;
 }
+.status::before{
+    content:""; width:6px; height:6px; border-radius:50%;
+    background:var(--ansi-green); box-shadow:0 0 8px var(--ansi-green);
+    animation:pulse 2s ease-in-out infinite;
+}
+@keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:.35;} }
 
-    body {font-family: Acme;}
-            
-            /* Style the tab */
-            .tab {
-  overflow: hidden;
-  border: 1px solid #ccc;
-  background-color: #f1f1f1;
-}
+.linklist a{ color:var(--ansi-cyan); text-decoration:none; border-bottom:1px solid transparent; }
+.linklist a:hover{ border-color:var(--ansi-cyan); }
 
-/* Style the buttons inside the tab */
-.tab button {
-  background-color: inherit;
-  float: left;
-  border: none;
-  outline: none;
-  cursor: pointer;
-  padding: 14px 16px;
-  transition: 0.3s;
-  font-size: 17px;
-}
+.kv{ display:grid; grid-template-columns:108px 1fr; gap:3px 10px; margin:4px 0; }
+.kv .k{ color:var(--muted); }
+.kv .v{ color:var(--fg); }
 
-/* Change background color of buttons on hover */
-.tab button:hover {
-  background-color:moccasin;
-}
+.bar-row{ display:grid; grid-template-columns:96px 1fr 38px; gap:8px; align-items:center; margin:3px 0; font-size:.78rem; }
+.bar-track{ height:6px; background:var(--bg); border-radius:3px; overflow:hidden; border:1px solid var(--border); }
+.bar-fill{ height:100%; border-radius:3px; }
 
-/* Create an active/current tablink class */
-.tab button.active {
-  background-color:rgba(255, 255, 255, 0.582);
-}
+.promptline{ display:flex; align-items:center; gap:8px; }
+.promptline .sym{ color:var(--ansi-green); flex-shrink:0; }
+.promptline .typed{ color:var(--fg); }
 
-/* Style the tab content */
-.tabcontent {
-  display: none;
-  padding: 6px 12px;
-  border: 1px solid deeppink;
-  border-top: none;
+.inputrow{
+    display:flex; align-items:center; gap:8px; padding:13px 22px;
+    border-top:1px solid var(--border); background:var(--chrome); flex-shrink:0;
 }
-body {
-    background-color: black;
-    color: white;
+.inputrow .sym{ color:var(--ansi-green); font-size:.84rem; }
+.inputrow input{
+    flex:1; background:none; border:none; outline:none;
+    color:var(--fg); font-family:inherit; font-size:.84rem; caret-color:var(--ansi-green);
 }
+.inputrow input::placeholder{ color:var(--muted); }
+.inputrow .hint{ font-size:.66rem; color:var(--muted); flex-shrink:0; }
 
-h1 {
-    font-family: Acme;
-    font-size: 150px;
-}
+@media (prefers-reduced-motion:reduce){ .window,.status::before{animation:none;} }
+@media (max-width:620px){ .window{width:100%; height:560px;} }
 
-p {
-    font-family: Monospace;
-    font-size: 30px;
-    margin: 15px;
-    padding: 15px;
+/* ============ GUI BODY — same window, minimal card content ============ */
+.gui-body{
+    display:none;
+    flex:1;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:32px;
+    text-align:center;
+    background:var(--term);
 }
-.insta {
-font-family: Acme;
-font-size: 40px;
-}
-a:link {
-  text-decoration: none;
-  color: #ccc;
-}
+.window.gui-mode .gui-body{ display:flex; }
+.window.gui-mode .screen,
+.window.gui-mode .inputrow{ display:none; }
 
-a:visited {
-  text-decoration: none;
-  color: #ccc;
+.gui-avatar{
+    width:84px; height:84px; border-radius:50%;
+    object-fit:cover; border:2px solid var(--gui-border);
 }
-
-a:hover {
-  text-decoration: underline;
-  color: #ccc;
+.gui-body h1{
+    margin-top:18px; font-family:'Inter',sans-serif;
+    font-size:1.5rem; font-weight:700; color:var(--gui-text); letter-spacing:-.01em;
 }
+.gui-body .role{
+    margin-top:5px; font-family:'Inter',sans-serif;
+    font-size:.84rem; color:var(--gui-accent); font-weight:500;
+}
+.gui-body .tagline{
+    margin-top:14px; font-family:'Inter',sans-serif;
+    font-size:.86rem; color:var(--gui-muted); line-height:1.6; max-width:380px;
+}
+.gui-body .quip{
+    margin-top:14px; font-family:'JetBrains Mono',monospace;
+    font-size:.74rem; color:var(--muted); font-style:italic;
+}
+.gui-status{
+    display:inline-flex; align-items:center; gap:7px; margin-top:18px;
+    padding:7px 13px; background:rgba(125,211,168,.08); border:1px solid rgba(125,211,168,.3);
+    border-radius:20px; font-family:'Inter',sans-serif; font-size:.72rem; color:var(--gui-accent); font-weight:500;
+}
+.gui-status::before{ content:""; width:6px; height:6px; border-radius:50%; background:var(--gui-accent); }
 
-a:active {
-  text-decoration: underline;
-  color: #ccc;
+.gui-links{ display:flex; gap:12px; margin-top:24px; }
+.gui-links a{
+    width:42px; height:42px; display:flex; align-items:center; justify-content:center;
+    border-radius:12px; background:var(--bg); border:1px solid var(--gui-border);
+    color:var(--gui-text); text-decoration:none; transition:.2s;
+}
+.gui-links a:hover{ background:var(--gui-accent); color:#0c0d10; border-color:var(--gui-accent); transform:translateY(-2px); }
+
+.gui-footer{
+    margin-top:26px; font-family:'JetBrains Mono',monospace;
+    font-size:.7rem; color:var(--muted);
 }
 </style>
 </head>
 <body>
 
+<noscript>
+  <main style="max-width:560px;margin:60px auto;padding:0 24px;font-family:system-ui,sans-serif;color:#e8eaed;background:#0b0d10;">
+    <img src="https://github.com/knight-byte.png" alt="Abunachar" width="80" height="80" style="border-radius:50%;">
+    <h1>Abunachar</h1>
+    <p>DevSecOps &amp; Cloud Infrastructure Engineer.</p>
+    <ul>
+      <li><a href="https://github.com/knight-byte">GitHub: github.com/knight-byte</a></li>
+      <li><a href="https://in.linkedin.com/in/abunachar">LinkedIn: in.linkedin.com/in/abunachar</a></li>
+      <li><a href="https://t.me/abunachar">Telegram: t.me/abunachar</a></li>
+      <li><a href="mailto:hello@abunachar.com">Email: hello@abunachar.com</a></li>
+    </ul>
+  </main>
+</noscript>
 
-<p>**** WORK IN PROGRESS ***</p>
+<div class="window" id="window" role="application" aria-label="Interactive profile">
+    <div class="titlebar">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <span class="path">guest@abunachar.com: ~</span>
+        <div class="toggle" role="group" aria-label="View mode">
+            <button id="btnTerm" class="active" aria-pressed="true">Terminal</button>
+            <button id="btnGui" aria-pressed="false">GUI</button>
+        </div>
+    </div>
 
+    <div class="screen" id="screen" tabindex="0" aria-live="polite"></div>
+    <div class="inputrow">
+        <span class="sym">$</span>
+        <input id="cmdInput" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="type 'help'" aria-label="Terminal command input">
+        <span class="hint">Tab / ↑↓</span>
+    </div>
 
-<div class="tab">
-  <button class="tablinks" onclick="openCity(event, 'HOME')">HOME</button>
-  <button class="tablinks" onclick="openCity(event, 'TAB')">TAB</button>
-  <button class="tablinks" onclick="openCity(event, 'ABOUT US')">ABOUT US</button>
+    <div class="gui-body">
+        <img src="https://github.com/knight-byte.png" alt="Abunachar" class="gui-avatar">
+        <h1>Abunachar</h1>
+        <div class="role">DevSecOps &amp; Cloud Infrastructure Engineer</div>
+        <p class="tagline">I lock down what other people leave open, and automate the parts they forget to.</p>
+        <p class="quip">"the cloud" is just someone else's computer, and I'm the one making sure it's not on fire.</p>
+        <div class="gui-status">Available for opportunities</div>
+        <div class="gui-links">
+            <a href="https://github.com/knight-byte" target="_blank" rel="noopener" aria-label="GitHub"><i class="fab fa-github"></i></a>
+            <a href="https://in.linkedin.com/in/abunachar" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+            <a href="https://t.me/abunachar" target="_blank" rel="noopener" aria-label="Telegram"><i class="fab fa-telegram"></i></a>
+            <a href="mailto:hello@abunachar.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
+        </div>
+        <div class="gui-footer">abunachar.com</div>
+    </div>
 </div>
-
-<div id="HOME" class="tabcontent">
-    <p>* work in progress </p>
-</div>
-
-<div id="TAB" class="tabcontent">
-    <p> TAB not yet Decided</p> 
-</div>
-
-<div id="ABOUT US" class="tabcontent">
-    <p>soon gonna fill up till then follow me on insta:  <a class="insta" href="https://www.instagram.com/_.masterofnothing._/">@_.masterofnothing._</a> </p>
-   
-</div>
-
-<p class="neon neoflux"><br>KNIGHT</p>
-<p class="flux neoflux">BYTE</p>
 
 <script>
-function openCity(evt, cityName) {
-  var i, tabcontent, tablinks;
-  tabcontent = document.getElementsByClassName("tabcontent");
-  for (i = 0; i < tabcontent.length; i++) {
-    tabcontent[i].style.display = "none";
-  }
-  tablinks = document.getElementsByClassName("tablinks");
-  for (i = 0; i < tablinks.length; i++) {
-    tablinks[i].className = tablinks[i].className.replace(" active", "");
+const screen = document.getElementById('screen');
+const input = document.getElementById('cmdInput');
+const win = document.getElementById('window');
 
-  }
-  document.getElementById(cityName).style.display = "block";
-  evt.currentTarget.className += " active";
+const LINKS = {
+    github:   { url: 'https://github.com/knight-byte',          label: 'github.com/knight-byte' },
+    linkedin: { url: 'https://in.linkedin.com/in/abunachar',     label: 'in.linkedin.com/in/abunachar' },
+    telegram: { url: 'https://t.me/abunachar',                  label: 't.me/abunachar' },
+    email:    { url: 'mailto:hello@abunachar.com',              label: 'hello@abunachar.com' }
+};
+
+/* ---------- view toggle (same window, swap inner content) ---------- */
+function setMode(gui){
+    win.classList.toggle('gui-mode', gui);
+    document.getElementById('btnTerm').classList.toggle('active', !gui);
+    document.getElementById('btnGui').classList.toggle('active', gui);
+    document.getElementById('btnTerm').setAttribute('aria-pressed', String(!gui));
+    document.getElementById('btnGui').setAttribute('aria-pressed', String(gui));
+    if(!gui) setTimeout(() => input.focus(), 50);
 }
-</script>
-   
+document.getElementById('btnTerm').addEventListener('click', () => setMode(false));
+document.getElementById('btnGui').addEventListener('click', () => setMode(true));
 
+/* ---------- terminal output helpers ---------- */
+function addLine(text, cls){
+    const div = document.createElement('div');
+    div.className = 'line' + (cls ? ' ' + cls : '');
+    div.innerHTML = text;
+    screen.appendChild(div);
+    screen.scrollTop = screen.scrollHeight;
+    return div;
+}
+function addBreak(){
+    const div = document.createElement('div');
+    div.style.height = '8px';
+    screen.appendChild(div);
+}
+function printIdentity(){
+    const wrap = document.createElement('div');
+    wrap.className = 'identity';
+    wrap.innerHTML = `
+        <img src="https://github.com/knight-byte.png" alt="Abunachar" class="avatar">
+        <div><h1>abunachar</h1><div class="role">devsecops / cloud / automation</div></div>`;
+    screen.appendChild(wrap);
+}
+function printStatus(){
+    const wrap = document.createElement('div');
+    wrap.className = 'status';
+    wrap.textContent = 'all systems provisioned, no drift detected';
+    screen.appendChild(wrap);
+}
+function bar(label, pct, color){
+    addLine(
+        `<div class="bar-row"><span style="color:var(--muted)">${label}</span>` +
+        `<div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div>` +
+        `<span style="color:${color}">${pct}%</span></div>`
+    );
+}
+
+/* ---------- command history ---------- */
+let history = [];
+let histIndex = -1;
+const COMMAND_LIST = ['help','whoami','about','security','cloudarch','skills','links','github','linkedin','telegram','email','uptime','neofetch','ls','gui','clear','sudo'];
+
+const COMMANDS = {
+    help(){
+        addLine('available commands:', 'muted');
+        addLine('  whoami        who runs this terminal');
+        addLine('  about         what abunachar does');
+        addLine('  security      how I approach DevSecOps');
+        addLine('  cloudarch     a quick look at pipeline architecture');
+        addLine('  skills        toolset breakdown');
+        addLine('  links         all social / contact links');
+        addLine('  github        open github profile');
+        addLine('  linkedin      open linkedin profile');
+        addLine('  telegram      open telegram');
+        addLine('  email         get my email address');
+        addLine('  neofetch      system info card');
+        addLine('  uptime        how long this has been running');
+        addLine('  gui           switch to the simple view');
+        addLine('  clear         clear the screen');
+        addBreak();
+        addLine('tip: ↑ / ↓ for history, Tab to autocomplete', 'muted');
+    },
+    whoami(){ printIdentity(); printStatus(); },
+    about(){
+        addLine('abunachar locks down infrastructure and automates');
+        addLine('the parts most people forget about until something');
+        addLine('leaks. cloud, security, repeat.');
+    },
+    security(){
+        addLine('$ cat security-principles.md', 'green');
+        addBreak();
+        addLine('▸ secrets       never hardcoded, never in plaintext logs', 'cyan');
+        addLine('▸ access        least privilege, nothing standing forever', 'cyan');
+        addLine('▸ scanning      checked early, not discovered in an audit', 'cyan');
+        addLine('▸ assumption    it is already compromised, build for that', 'cyan');
+        addBreak();
+        addLine('"it works" and "it is secure" are different sentences.', 'muted');
+    },
+    cloudarch(){
+        addLine('$ cat infra-notes.txt', 'green');
+        addBreak();
+        addLine('  code', 'fg');
+        addLine('   │', 'muted');
+        addLine('   ▼', 'muted');
+        addLine('  [ checked ]   ── before it ships, not after it breaks', 'magenta');
+        addLine('   │', 'muted');
+        addLine('   ▼', 'muted');
+        addLine('  cloud', 'fg');
+        addLine('   │', 'muted');
+        addLine('   ▼', 'muted');
+        addLine('  [ watched ]   ── because someone always forgets to', 'magenta');
+        addBreak();
+        addLine("the cloud is just someone else's computer.", 'yellow');
+        addLine("my job is making sure it's not on fire.", 'yellow');
+    },
+    skills(){
+        addLine('$ cat toolset.json', 'green');
+        addBreak();
+        bar('automation',  90, 'var(--ansi-green)');
+        bar('security',     82, 'var(--ansi-yellow)');
+        bar('cloud',         78, 'var(--ansi-blue)');
+        bar('python',        88, 'var(--ansi-magenta)');
+        bar('patience',      40, 'var(--ansi-red)');
+    },
+    links(){
+        addLine('<span class="linklist"><i class="fab fa-github"></i> <a href="' + LINKS.github.url + '" target="_blank" rel="noopener">' + LINKS.github.label + '</a></span>', 'cyan');
+        addLine('<span class="linklist"><i class="fab fa-linkedin"></i> <a href="' + LINKS.linkedin.url + '" target="_blank" rel="noopener">' + LINKS.linkedin.label + '</a></span>', 'cyan');
+        addLine('<span class="linklist"><i class="fab fa-telegram"></i> <a href="' + LINKS.telegram.url + '" target="_blank" rel="noopener">' + LINKS.telegram.label + '</a></span>', 'cyan');
+        addLine('<span class="linklist"><i class="fas fa-envelope"></i> <a href="' + LINKS.email.url + '">' + LINKS.email.label + '</a></span>', 'cyan');
+    },
+    github(){ addLine('opening ' + LINKS.github.label + ' …', 'blue'); window.open(LINKS.github.url, '_blank', 'noopener'); },
+    linkedin(){ addLine('opening ' + LINKS.linkedin.label + ' …', 'blue'); window.open(LINKS.linkedin.url, '_blank', 'noopener'); },
+    telegram(){ addLine('opening ' + LINKS.telegram.label + ' …', 'blue'); window.open(LINKS.telegram.url, '_blank', 'noopener'); },
+    email(){ addLine(LINKS.email.label + ' — copy-paste works fine, no form needed.', 'cyan'); window.location.href = LINKS.email.url; },
+    uptime(){ addLine("uptime: building things that don't page you", 'yellow'); },
+    neofetch(){
+        const wrap = document.createElement('div');
+        wrap.className = 'identity';
+        wrap.style.marginTop = '4px';
+        wrap.innerHTML = `<img src="https://github.com/knight-byte.png" alt="Abunachar" class="avatar">
+            <div class="kv">
+                <span class="k">user</span><span class="v" style="color:var(--ansi-green)">abunachar</span>
+                <span class="k">role</span><span class="v">DevSecOps Engineer</span>
+                <span class="k">focus</span><span class="v">secure cloud infra</span>
+                <span class="k">trust</span><span class="v">zero</span>
+                <span class="k">shell</span><span class="v">/bin/zsh</span>
+            </div>`;
+        screen.appendChild(wrap);
+    },
+    ls(){ addLine('about.md  security.md  infra-notes.txt  toolset.json  links.txt', 'blue'); },
+    gui(){ addLine('switching to simple view …', 'magenta'); setTimeout(() => setMode(true), 300); },
+    sudo(){ addLine('nice try. that only works in movies.', 'red'); },
+    clear(){ screen.innerHTML = ''; }
+};
+
+function runCommand(raw){
+    const cmd = raw.trim().toLowerCase();
+    const echo = document.createElement('div');
+    echo.className = 'promptline';
+    echo.innerHTML = '<span class="sym">$</span><span class="typed"></span>';
+    echo.querySelector('.typed').textContent = raw;
+    screen.appendChild(echo);
+
+    if(cmd !== ''){ history.push(raw); histIndex = history.length; }
+    if(cmd === ''){ screen.scrollTop = screen.scrollHeight; return; }
+    if(COMMANDS[cmd]){ COMMANDS[cmd](); }
+    else { addLine('command not found: ' + cmd + " — try 'help'", 'red'); }
+    addBreak();
+    screen.scrollTop = screen.scrollHeight;
+}
+
+input.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter'){
+        const val = input.value; input.value = ''; runCommand(val);
+    } else if(e.key === 'ArrowUp'){
+        e.preventDefault();
+        if(histIndex > 0){ histIndex--; input.value = history[histIndex] || ''; }
+    } else if(e.key === 'ArrowDown'){
+        e.preventDefault();
+        if(histIndex < history.length - 1){ histIndex++; input.value = history[histIndex] || ''; }
+        else { histIndex = history.length; input.value = ''; }
+    } else if(e.key === 'Tab'){
+        e.preventDefault();
+        const partial = input.value.trim().toLowerCase();
+        if(partial){
+            const match = COMMAND_LIST.find(c => c.startsWith(partial));
+            if(match) input.value = match;
+        }
+    }
+});
+win.addEventListener('click', (e) => {
+    if(win.classList.contains('gui-mode')) return;
+    if(e.target.tagName !== 'A' && e.target.tagName !== 'BUTTON') input.focus();
+});
+
+/* ---------- boot sequence ---------- */
+const boot = [
+    { text: 'ssh guest@abunachar.com', cls: 'fg', delay: 200 },
+    { text: 'last login: ' + new Date().toLocaleString(), cls: 'muted', delay: 200 },
+    { text: 'access granted - welcome', cls: 'green', delay: 240 },
+    { text: '', cls: '', delay: 80 }
+];
+let i = 0;
+function playBoot(){
+    if(i >= boot.length){
+        printIdentity();
+        printStatus();
+        addBreak();
+        addLine("type <span style=\"color:var(--ansi-green)\">help</span> to see what's here, or <span style=\"color:var(--ansi-magenta)\">gui</span> for the simple view.", 'muted');
+        addBreak();
+        input.focus();
+        return;
+    }
+    const b = boot[i];
+    if(b.text !== '') addLine(b.text, b.cls);
+    i++;
+    setTimeout(playBoot, b.delay);
+}
+playBoot();
+</script>
 </body>
-</html> 
+</html>
