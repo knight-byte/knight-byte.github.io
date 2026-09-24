@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Skill Graph | Abunachar</title>
+<meta name="description" content="Interactive skill graph of Abunachar, Site Reliability & DevSecOps Engineer: cloud, Kubernetes, SRE, security and the projects that tie them together.">
+<meta name="author" content="Abunachar">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://abunachar.com/skills/">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://abunachar.com/skills/">
+<meta property="og:title" content="Skill Graph | Abunachar">
+<meta property="og:description" content="Cloud, Kubernetes, SRE and security skills, wired to the projects that used them.">
+<meta property="og:image" content="https://abunachar.com/avatar.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Geist:wght@500;600;700&display=swap">
+<style>
+:root{
+    /* same tokens as the terminal on the home page (index.html :root) */
+    --bg:#0c0d10;
+    --term:#15171c;
+    --chrome:#1b1d23;
+    --border:#2a2d35;
+    --fg:#cdd3de;
+    --muted:#9499a6;
+    --ansi-green:#9ece6a;
+    --ansi-cyan:#7dcfba;
+    --ansi-yellow:#e0af68;
+    --ansi-red:#e06c75;
+    --ansi-blue:#7aa2f7;
+    --ansi-magenta:#bb9af7;
+
+    /* graph: each skill area wears one ANSI colour; cross-area things stay neutral */
+    --accent:var(--ansi-cyan);
+    --graph-bg:var(--term);
+    --root:#e8eaed;
+    --project:#cdd3de;
+    --ink:#0c0d10;                  /* text on filled nodes and active chips */
+    --label:#d5dae3;
+    --title:#e8eaed;
+
+    /* shape rule: containers 10px, inputs 6px, chips full pill */
+    --r-box:10px;
+    --r-input:6px;
+    --r-pill:999px;
+
+    --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+    --ease:cubic-bezier(.16,1,.3,1);
+}
+*{ margin:0; padding:0; box-sizing:border-box; }
+[hidden]{ display:none !important; }
+html,body{ height:100%; }
+body{
+    font-family:var(--mono);
+    background:var(--bg);
+    color:var(--fg);
+    display:flex;
+    flex-direction:column;
+    min-height:100dvh;
+    overflow:hidden;
+}
+/* same scanline texture as the home page terminal */
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    background:repeating-linear-gradient(
+        0deg, rgba(255,255,255,.012), rgba(255,255,255,.012) 1px,
+        transparent 1px, transparent 3px
+    );
+}
+:focus-visible{ outline:1px solid var(--accent); outline-offset:2px; }
+
+/* ============ TITLEBAR ============ */
+.titlebar{
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+    padding:10px 16px; background:var(--chrome);
+    border-bottom:1px solid var(--border); flex-shrink:0;
+}
+.dot{ width:11px; height:11px; border-radius:50%; }
+.dot:nth-child(1){ background:#e06c75; opacity:.55; }
+.dot:nth-child(2){ background:#e0af68; opacity:.55; }
+.dot:nth-child(3){ background:#9ece6a; opacity:.55; }
+.path{ margin-left:6px; font-size:.72rem; color:var(--muted); }
+.back{
+    margin-left:10px; font-size:.72rem; color:var(--accent); text-decoration:none;
+    border-bottom:1px solid transparent;
+}
+.back:hover{ border-color:var(--accent); }
+.search{
+    margin-left:auto; display:flex; align-items:center; gap:6px;
+    background:var(--bg); border:1px solid var(--border); border-radius:var(--r-input); padding:5px 9px;
+    transition:border-color .2s var(--ease);
+}
+.search:focus-within{ border-color:var(--ansi-green); }
+.search.miss{ border-color:var(--ansi-red); }
+.search .sym{ color:var(--ansi-green); font-size:.74rem; }
+.search input{
+    width:200px; background:none; border:none; outline:none;
+    color:var(--fg); font-family:inherit; font-size:.74rem; caret-color:var(--ansi-green);
+}
+.search input::placeholder{ color:var(--muted); }
+
+/* ============ STAGE ============ */
+.stage{ position:relative; flex:1; min-height:0; background:var(--graph-bg); }
+svg{ display:block; width:100%; height:100%; cursor:grab; touch-action:none; }
+svg:active{ cursor:grabbing; }
+
+.intro{ position:absolute; left:20px; top:18px; max-width:340px; pointer-events:none; }
+.intro h1{ font-family:var(--sans); font-size:1.15rem; font-weight:600; color:var(--title); letter-spacing:-.01em; }
+.intro p{ margin-top:6px; font-family:var(--sans); font-size:.82rem; line-height:1.5; color:var(--muted); }
+.intro .status{ margin-top:10px; font-size:.68rem; color:var(--muted); }
+.intro .status.miss{ color:var(--ansi-red); }
+
+/* links: tinted by the area they point into (--c set per line); root spokes stay neutral */
+.link{ stroke:color-mix(in srgb, var(--c, var(--fg)) 20%, transparent); stroke-width:1; transition:stroke .2s var(--ease), stroke-opacity .2s var(--ease); }
+.link.hub{ stroke:color-mix(in srgb, var(--c) 42%, transparent); }
+.node{ cursor:pointer; transition:opacity .2s var(--ease); }
+.node circle.body{ fill:color-mix(in srgb, var(--c) 82%, var(--term)); }
+.node.hub circle.body,
+.node.root circle.body,
+.node.project circle.body{ fill:var(--c); }
+.node circle.ring{ fill:none; stroke:var(--c); stroke-opacity:.6; stroke-width:3; stroke-dasharray:3 2; }
+.node text{ pointer-events:none; font-family:var(--sans); transition:opacity .2s var(--ease); }
+.node text.inside{ fill:var(--ink); font-weight:700; text-anchor:middle; }
+.node text.outside{ fill:var(--label); font-size:11px; font-weight:500; text-anchor:middle; paint-order:stroke; stroke:var(--graph-bg); stroke-width:3px; }
+.node.skill text.outside{ opacity:0; }
+svg.zoomed .node.skill text.outside{ opacity:1; }
+
+svg.focus .node{ opacity:.16; }
+svg.focus .link{ stroke-opacity:.35; }
+svg.focus .node.lit,
+svg.focus .node.peek{ opacity:1; }
+svg.focus .node.lit text.outside,
+.node.peek text.outside{ opacity:1; }
+svg.focus .link.lit{ stroke:color-mix(in srgb, var(--c, var(--fg)) 90%, transparent); stroke-opacity:1; stroke-width:1.4; }
+.node.selected circle.body{ stroke:var(--root); stroke-width:2; }
+.node.peek circle.body{ stroke:var(--root); stroke-width:3; }
+
+/* ============ CHIPS (legend, panel links) ============ */
+.chip{
+    --c:var(--fg);
+    font-family:var(--mono); font-size:.68rem; padding:4px 10px; border-radius:var(--r-pill);
+    border:1px solid color-mix(in srgb, var(--c) 35%, var(--border)); background:rgba(12,13,16,.85);
+    color:var(--fg); cursor:pointer;
+    transition:border-color .2s var(--ease), background-color .2s var(--ease), color .2s var(--ease), transform .1s var(--ease);
+}
+.chip:hover{ border-color:var(--c); }
+.chip:active{ transform:translateY(1px); }
+.chip.key::before{
+    content:""; display:inline-block; width:8px; height:8px; margin-right:7px; vertical-align:-1px;
+    border-radius:50%; background:var(--c);
+}
+.chip.key.proj::before{ background:none; box-shadow:inset 0 0 0 2px var(--c); }
+.chip.active{ background:var(--c); color:var(--ink); border-color:var(--c); font-weight:700; }
+.chip.active::before{ background:var(--ink); }
+.chip .n{ margin-left:6px; color:var(--muted); }
+
+.legend{
+    position:absolute; left:14px; bottom:14px; display:flex; flex-wrap:wrap; gap:6px;
+    max-width:min(640px, calc(100% - 28px));
+}
+
+/* ============ INFO PANEL ============ */
+.panel{
+    --c:var(--accent);
+    position:absolute; z-index:2; right:14px; top:14px; width:364px; max-height:calc(100% - 28px); overflow-y:auto;
+    background:var(--chrome); border:1px solid var(--border); border-top:2px solid var(--c);
+    border-radius:var(--r-box); padding:10px 18px 18px;
+    box-shadow:0 24px 48px -20px rgba(4,8,10,.8);
+}
+.panel .bar{ display:flex; align-items:center; gap:2px; margin:0 -8px 8px; }
+.panel .bar .spacer{ flex:1; }
+.iconbtn{
+    height:28px; min-width:28px; padding:0 8px; border-radius:var(--r-input);
+    background:none; border:none; color:var(--muted); cursor:pointer;
+    font-family:var(--mono); font-size:.8rem;
+    transition:background-color .15s var(--ease), color .15s var(--ease);
+}
+.iconbtn:first-child{ font-size:.7rem; }
+.iconbtn:hover{ color:var(--fg); background:var(--term); }
+.iconbtn:active{ transform:translateY(1px); }
+
+.panel .kind{ display:flex; align-items:center; gap:8px; font-size:.64rem; letter-spacing:.08em; text-transform:uppercase; color:var(--c); }
+.badge{
+    font-size:.6rem; letter-spacing:.02em; text-transform:none; color:var(--fg);
+    padding:1px 8px; border-radius:var(--r-pill); border:1px solid var(--border);
+}
+.panel h2{ margin-top:6px; font-family:var(--sans); font-size:1.2rem; font-weight:600; color:var(--title); letter-spacing:-.01em; }
+.panel .meta{ margin-top:4px; font-size:.68rem; color:var(--muted); }
+.panel p.lead{ margin-top:10px; font-family:var(--sans); font-size:.86rem; line-height:1.55; color:var(--fg); }
+.panel p.empty{ margin-top:14px; font-family:var(--sans); font-size:.78rem; color:var(--muted); }
+.panel h3{ margin-top:18px; font-size:.68rem; font-weight:400; color:var(--muted); }
+.panel h3::before{ content:"# "; color:var(--c); opacity:.7; }
+.panel .nbrs{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+.panel .nbrs .chip{ background:var(--bg); }
+
+.stats{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:14px; }
+.stat{ padding:10px 12px; border-radius:var(--r-box); background:var(--term); border:1px solid var(--border); }
+.stat b{ display:block; font-size:.9rem; font-weight:600; color:var(--c); }
+.stat span{ display:block; margin-top:3px; font-family:var(--sans); font-size:.72rem; line-height:1.35; color:var(--muted); }
+
+.points{ list-style:none; margin-top:6px; }
+.points li{ position:relative; margin-top:6px; padding-left:16px; font-family:var(--sans); font-size:.82rem; line-height:1.5; }
+.points li::before{ content:"›"; position:absolute; left:2px; color:var(--c); font-family:var(--mono); }
+
+.cards{ display:grid; gap:6px; margin-top:8px; }
+.card{
+    width:100%; text-align:left; padding:9px 12px; cursor:pointer;
+    border-radius:var(--r-box); border:1px solid var(--border); background:var(--term); color:var(--fg);
+    transition:border-color .2s var(--ease), transform .1s var(--ease);
+}
+.card:hover{ border-color:var(--muted); }
+.card:active{ transform:translateY(1px); }
+.card b{ display:flex; align-items:center; gap:8px; font-family:var(--sans); font-size:.82rem; font-weight:600; color:var(--title); }
+.card em{ font-style:normal; font-family:var(--mono); font-size:.6rem; font-weight:400; color:var(--muted); padding:1px 7px; border-radius:var(--r-pill); border:1px solid var(--border); }
+.card span{ display:block; margin-top:3px; font-family:var(--sans); font-size:.76rem; line-height:1.45; color:var(--muted); }
+
+.roles{ display:grid; gap:4px; margin-top:8px; }
+.role{
+    display:grid; grid-template-columns:1fr auto; gap:2px 12px; width:100%; text-align:left;
+    padding:8px 10px; cursor:pointer; color:var(--fg);
+    border-radius:var(--r-box); border:1px solid transparent; background:none;
+    transition:background-color .15s var(--ease), border-color .15s var(--ease);
+}
+.role:hover{ background:var(--term); }
+.role.active{ background:var(--term); border-color:var(--c); }
+.role .t{ font-family:var(--sans); font-size:.82rem; }
+.role .p{ grid-column:1; font-size:.66rem; color:var(--muted); }
+.role .n{ grid-column:2; grid-row:1 / span 2; align-self:center; font-size:.66rem; color:var(--muted); }
+.roles .hint{ margin-top:4px; padding:0 10px; font-family:var(--sans); font-size:.72rem; color:var(--muted); }
+
+.panel .links{ display:flex; gap:16px; margin-top:18px; padding-top:14px; border-top:1px solid var(--border); }
+.panel .links a{ font-size:.72rem; color:var(--accent); text-decoration:none; border-bottom:1px solid transparent; }
+.panel .links a:hover{ border-color:var(--accent); }
+.panel .keys{ margin-top:18px; font-size:.64rem; color:var(--muted); }
+@media (pointer:coarse){ .panel .keys{ display:none; } }
+
+.panel::-webkit-scrollbar{ width:6px; }
+.panel::-webkit-scrollbar-thumb{ background:var(--border); border-radius:3px; }
+
+/* ============ FALLBACK (d3 failed to load) ============ */
+.fallback{ height:100%; overflow-y:auto; padding:28px 20px 40px; max-width:760px; }
+.fallback-note{ font-family:var(--sans); color:var(--muted); font-size:.86rem; }
+.fallback section{ --c:var(--accent); margin-top:22px; }
+.fallback h2{ font-family:var(--sans); font-size:.95rem; font-weight:600; color:var(--c); }
+.fallback .chips{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+.fallback .chips span{ font-size:.7rem; padding:4px 10px; border-radius:var(--r-pill); border:1px solid color-mix(in srgb, var(--c) 35%, var(--border)); }
+.fallback section > p{ margin-top:10px; font-family:var(--sans); font-size:.84rem; line-height:1.55; max-width:65ch; }
+.fallback b{ color:var(--title); font-weight:600; }
+
+/* motion: graph eases in once laid out; panel slides from where it's anchored */
+@media (prefers-reduced-motion:no-preference){
+    #graph{ animation:fade-in .6s var(--ease) both; }
+    .panel:not([hidden]){ animation:panel-in .22s var(--ease); }
+}
+@keyframes fade-in{ from{ opacity:0; } to{ opacity:1; } }
+@keyframes panel-in{ from{ opacity:0; transform:translateX(8px); } to{ opacity:1; transform:none; } }
+
+@media (max-width:640px){
+    .path{ display:none; }
+    .search{ flex:1 1 100%; order:5; margin-left:0; min-width:0; }
+    .search input{ flex:1; width:auto; min-width:0; }
+    .intro{ left:14px; top:12px; right:14px; }
+    .intro p{ display:none; }
+    .panel{
+        left:0; right:0; top:auto; bottom:0; width:auto; max-height:62%;
+        border-radius:var(--r-box) var(--r-box) 0 0; border-bottom:none;
+    }
+    @keyframes panel-in{ from{ opacity:0; transform:translateY(16px); } to{ opacity:1; transform:none; } }
+    .legend{ bottom:10px; left:10px; }
+    /* the bottom sheet and the legend share the same strip; the open sheet wins */
+    .stage:has(.panel:not([hidden])) .legend{ display:none; }
+}
+</style>
+</head>
+<body>
+
+<noscript>
+  <main style="max-width:640px;margin:40px auto;padding:0 20px;line-height:1.7;">
+    <h1>Abunachar's skills</h1>
+    <p><b>Cloud &amp; IaC:</b> GCP (GKE, Cloud SQL, VPC, IAM, KMS), AWS (EC2, S3, RDS, Lambda), OVH, Terraform, Helm</p>
+    <p><b>Kubernetes &amp; CI/CD:</b> Docker, Kubernetes, Istio, ArgoCD, Jenkins, GitHub Actions, autoscaling</p>
+    <p><b>SRE &amp; Observability:</b> SLOs/SLAs, MTTR, incident/RCA, Prometheus, Grafana, New Relic, tracing</p>
+    <p><b>Security:</b> SAST/DAST, OPA, Pod Security Standards, vulnerability management, VAPT, SOC 2, IAM/RBAC, encryption</p>
+    <p><b>Languages &amp; Data:</b> Python, Bash, Ruby on Rails, GraphQL, SQL, PostgreSQL, MongoDB, Redis, ClickHouse, Linux</p>
+    <p><b>Leadership:</b> Team lead, OKRs/roadmap, hiring, mentoring, FinOps</p>
+    <p><a href="/" style="color:#7dcfba">← back home</a></p>
+  </main>
+</noscript>
+
+<header class="titlebar">
+    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+    <span class="path">guest@abunachar.com: ~/skills</span>
+    <a class="back" href="/">← cd ~</a>
+    <label class="search" id="searchBox">
+        <span class="sym">/</span>
+        <input id="search" type="text" list="nodeList" autocomplete="off" spellcheck="false" placeholder="find a skill or project" aria-label="Find a skill or project" aria-describedby="status">
+        <datalist id="nodeList"></datalist>
+    </label>
+</header>
+
+<main class="stage" id="stage">
+    <svg id="graph" role="img" aria-label="Skill graph: skills grouped by area, linked to the projects that used them"></svg>
+    <div class="intro">
+        <h1>Abunachar's skill graph</h1>
+        <p>Skills from four years of SRE and DevSecOps work, linked to the projects that used them.</p>
+        <div class="status" id="status" aria-live="polite">Drag to rearrange, scroll to zoom, click a node for details.</div>
+    </div>
+    <div class="legend" id="legend" role="group" aria-label="Highlight a skill area"></div>
+    <aside class="panel" id="panel" hidden aria-live="polite"></aside>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+/* ---------- data (from the resume) ---------- */
+const CATEGORIES = {
+    'Cloud & IaC':          ['GCP','GKE','Cloud SQL','VPC','IAM','KMS','AWS','EC2','S3','RDS','Lambda','OVH','Terraform','Helm'],
+    'Kubernetes & CI/CD':   ['Docker','Kubernetes','Istio','ArgoCD','Jenkins','GitHub Actions','Autoscaling'],
+    'SRE & Observability':  ['SLOs/SLAs','MTTR','Incident/RCA','Monitoring','Prometheus','Grafana','New Relic','Tracing'],
+    'Security':             ['SAST/DAST','OPA','Pod Security Standards','Vuln Management','VAPT','SOC 2','IAM/RBAC','Encryption'],
+    'Languages & Data':     ['Python','Bash','Ruby on Rails','GraphQL','SQL','PostgreSQL','MongoDB','Redis','ClickHouse','Linux'],
+    'Leadership':           ['Team Lead','OKRs/Roadmap','Stakeholder Alignment','Hiring','Mentoring','FinOps']
+};
+
+// same ANSI colours the terminal on the home page prints with
+const AREA_COLOR = {
+    'Cloud & IaC':         'var(--ansi-blue)',
+    'Kubernetes & CI/CD':  'var(--ansi-cyan)',
+    'SRE & Observability': 'var(--ansi-yellow)',
+    'Security':            'var(--ansi-red)',
+    'Languages & Data':    'var(--ansi-magenta)',
+    'Leadership':          'var(--ansi-green)'
+};
+
+const AREA_BLURB = {
+    'Cloud & IaC':         'GCP-first infrastructure (GKE, Cloud SQL, VPC, IAM, KMS) alongside AWS and OVH, managed as code with Terraform and Helm.',
+    'Kubernetes & CI/CD':  'Workloads on Kubernetes with an Istio service mesh, GitOps releases through ArgoCD, pipelines on Jenkins and GitHub Actions, and custom autoscaling.',
+    'SRE & Observability': 'SLOs, incident response and RCA, backed by Prometheus, Grafana, New Relic and tracing.',
+    'Security':            'Security built into CI/CD, policy-as-code, Kubernetes hardening, VAPT remediation and SOC 2 readiness.',
+    'Languages & Data':    'Python and Bash for automation, Ruby on Rails and GraphQL for services, with PostgreSQL, MongoDB, Redis and ClickHouse underneath.',
+    'Leadership':          'Leads the DevOps team at GoComet and owns the DevSecOps roadmap, OKRs, hiring and FinOps.'
+};
+
+// only what the resume actually says about a skill; skills without a note just show their links
+const SKILL_NOTE = {
+    'Ruby on Rails':  'Main application stack. Solo Ruby 2 to 3 upgrade in one month, Rails 7, and Rails memory cut from 60 GB to 25 GB.',
+    'PostgreSQL':     'Upgraded 13 to 18, added delete-guard triggers, and moved migrations to daily deploys with safe-pg-migration.',
+    'Kubernetes':     'Runs the platform. Moved deployments to Helm with versioned releases and enforced Pod Security Standards.',
+    'GKE':            'Ground-up HA deployment, plus client-wise deployment segregation with dynamic routing.',
+    'Cloud SQL':      'HA setup with automated backups and quarterly DR drills.',
+    'Terraform':      'Introduced Terraform, then built GoStack, a multi-cloud IaC platform.',
+    'Helm':           'Versioned releases with one-step rollback and failure-rate tracking.',
+    'New Relic':      'Led the org-wide rollout across 100% of services.',
+    'Autoscaling':    'Wrote the first Sidekiq/Puma autoscaler, then custom Rails and Sidekiq scalers. Now building an AI-driven one.',
+    'GraphQL':        'Architected Prism, a custom GraphQL API Gateway, and shipped it to production.',
+    'SOC 2':          'Drove SOC 2 readiness and produced the audit evidence.',
+    'VAPT':           'Remediated 30+ critical/high findings within a 30-day SLA.',
+    'MTTR':           'Cut from 2 hrs to 30 min (75%).',
+    'SLOs/SLAs':      'Defined SLOs/SLAs and rolled out Prometheus/Grafana SLO dashboards, at 99.9% uptime.',
+    'Incident/RCA':   'Built the incident and RCA framework behind the MTTR drop.',
+    'Prometheus':     'Backs the SLO dashboards and feeds the autoscaler work.',
+    'Grafana':        'SLO dashboards.',
+    'FinOps':         'Rightsizing plus memory work, saving ~INR 7-8 lakh/month.',
+    'Encryption':     'KMS key rotation, JWT moved from HS256 to ES256, SHA256 digests.',
+    'KMS':            'Key rotation as part of cloud hardening.',
+    'VPC':            'Isolated the production VPC and put internal tools behind VPN.',
+    'OPA':            'Policy-as-code checks in CI/CD.',
+    'SAST/DAST':      'Scans gate the CI/CD pipelines.',
+    'Pod Security Standards': 'Enforced across the Kubernetes clusters.',
+    'IAM/RBAC':       'SSO-only admin, login lockouts and audited console access.',
+    'MongoDB':        'Segregated by use case and upgraded during the EOL program.',
+    'Redis':          'Segregated by use case for the HA setup.',
+    'Team Lead':      'Leads a DevOps team of 4.',
+    'Hiring':         'Hires for the DevOps team.',
+    'Mentoring':      'Mentors the DevOps team, including performance reviews.',
+    'OKRs/Roadmap':   'Owns the DevSecOps roadmap and OKRs: cloud and data security, CI/CD, compliance, scale.'
+};
+
+const ROLES = [
+    { id:'sde3', title:'SDE3, DevSecOps',                   short:'SDE3', period:'Jun 2026 - Present',  from:2026 },
+    { id:'sde2', title:'SDE2 to Senior SDE2, DevSecOps',    short:'SDE2', period:'Apr 2024 - May 2026', from:2024 },
+    { id:'sde1', title:'Backend Engineer (Intern to SDE1)', short:'SDE1', period:'Jun 2022 - Mar 2024', from:2022 }
+];
+
+// newest first; this order also drives prev / next in the panel
+const PROJECTS = [
+    { id:'DevOps Team Lead', roles:['sde3'], status:'Ongoing',
+      summary:'Leads a DevOps team of 4 and owns the DevSecOps roadmap.',
+      metrics:[['4','engineers on the team']],
+      points:['Owns the roadmap and OKRs: cloud and data security, CI/CD, compliance, scale.', 'Hiring, performance reviews and mentoring.'],
+      uses:['Team Lead','OKRs/Roadmap','Hiring','Mentoring','Stakeholder Alignment'] },
+    { id:'Microservices Migration', roles:['sde3'], status:'In progress',
+      summary:'Leading the move from a monolith to microservices.',
+      metrics:[['2','gems built']],
+      points:['Extracted a core component out of the monolith.', 'Built an adapter gem and an inter-service gem.'],
+      uses:['Ruby on Rails','Kubernetes','Istio','GraphQL'] },
+    { id:'Prism', roles:['sde3'], status:'Shipped',
+      summary:'A custom GraphQL API Gateway, architected and shipped to production.',
+      metrics:[],
+      points:['Architected the gateway and took it to production.'],
+      uses:['GraphQL','Ruby on Rails','Kubernetes','Istio'] },
+    { id:'GoStack', roles:['sde3'], status:'Shipped',
+      summary:'A multi-cloud, AI-orchestrated IaC platform.',
+      metrics:[['1-2 days → <1 hr','environment setup time']],
+      points:['Provisions environments across clouds from one platform.'],
+      uses:['Terraform','Helm','GCP','AWS','OVH','Python'] },
+    { id:'AI Autoscaler', roles:['sde3'], status:'In progress',
+      summary:'An autonomous autoscaler driven by live metrics and traffic.',
+      metrics:[],
+      points:['Scales on live metrics and traffic rather than fixed thresholds.'],
+      uses:['Autoscaling','Prometheus','Kubernetes','Python'] },
+    { id:'Cloud Hardening', roles:['sde3'], status:'Shipped',
+      summary:'Locked down the production cloud and the data inside it.',
+      metrics:[],
+      points:['Production VPC isolation and VPN-only internal tools.', 'IDS/IPS, WAF and Security Command Center.', 'KMS key rotation and Secret Manager rotation.', 'Time-bound DB credentials, PII-masked non-prod data and upload scanning.'],
+      uses:['VPC','KMS','IAM','Encryption','GCP'] },
+    { id:'CI/CD Security', roles:['sde3'], status:'Shipped',
+      summary:'Security checks that run on every pipeline.',
+      metrics:[],
+      points:['SAST/DAST gating in CI/CD.', 'OPA policy-as-code.', 'Kubernetes Pod Security Standards enforced.'],
+      uses:['SAST/DAST','OPA','Pod Security Standards','GitHub Actions','Jenkins','ArgoCD'] },
+    { id:'VAPT & SOC 2', roles:['sde3','sde2'], status:'Shipped',
+      summary:'Due diligence, VAPT remediation and SOC 2 readiness.',
+      metrics:[['30+','critical/high findings fixed'],['30-day','remediation SLA']],
+      points:['Drove due diligence and VAPT; produced SOC 2 evidence.', 'Fixed client VAPT findings: OTP rate limits, SSO redirects, race conditions.'],
+      uses:['VAPT','SOC 2','Vuln Management','IAM/RBAC'] },
+    { id:'EOL Upgrades', roles:['sde3','sde2'], status:'Shipped',
+      summary:'Led the program that cleared every critical end-of-life dependency.',
+      metrics:[['100%','critical EOL resolved'],['1 month','solo Ruby 2 → 3']],
+      points:['Ruby 2 to 3 alone in a month, plus Rails 7.', 'PostgreSQL 13 to 18 and MongoDB upgrades.'],
+      uses:['Ruby on Rails','PostgreSQL','MongoDB','SQL'] },
+    { id:'SLO & Incident Framework', roles:['sde2','sde3'], status:'Shipped',
+      summary:'SLOs/SLAs and an incident/RCA process that cut recovery time by 75%.',
+      metrics:[['2 hrs → 30 min','MTTR (75% faster)'],['99.9%','uptime']],
+      points:['Established SLOs/SLAs and the incident/RCA framework.', 'Rolled out Prometheus/Grafana SLO dashboards.'],
+      uses:['SLOs/SLAs','MTTR','Incident/RCA','Grafana','Prometheus','Monitoring'] },
+    { id:'Cost Optimization', roles:['sde2'], status:'Shipped',
+      summary:'Cut Rails memory by 58% and rightsized the rest of the cloud bill.',
+      metrics:[['60 → 25 GB','Rails memory'],['~INR 7-8 lakh','saved per month']],
+      points:['Memory work on the Rails app, then rightsizing with FinOps practices.'],
+      uses:['FinOps','Ruby on Rails','GKE','Monitoring'] },
+    { id:'Rails & Sidekiq Autoscalers', roles:['sde2','sde1'], status:'Shipped',
+      summary:'Autoscalers for the Rails app and its Sidekiq workers.',
+      metrics:[],
+      points:['Built the first Sidekiq/Puma autoscaler, replacing a shell-script version.', 'Custom autoscalers for Rails and Sidekiq.', 'On-demand pools that re-dispatch OOM-prone jobs.'],
+      uses:['Autoscaling','Ruby on Rails','Redis','GKE','Kubernetes'] },
+    { id:'HA on GKE', roles:['sde2'], status:'Shipped',
+      summary:'A ground-up high-availability deployment on GKE and Cloud SQL.',
+      metrics:[],
+      points:['HA deployment on GKE and Cloud SQL.', 'Redis and MongoDB segregated by use case.', 'Client-wise deployment segregation with dynamic routing for isolated releases.'],
+      uses:['GKE','Cloud SQL','Redis','MongoDB','Docker'] },
+    { id:'DR & BCP', roles:['sde2'], status:'Shipped',
+      summary:'A tested disaster-recovery plan with automated backups.',
+      metrics:[['6 hrs','RTO'],['1 hr','RPO']],
+      points:['Automated backups and formalised the DR plan.', 'Quarterly BCP/DR drills meet the targets.'],
+      uses:['Cloud SQL','PostgreSQL','MongoDB','GCP'] },
+    { id:'Helm + Terraform', roles:['sde2'], status:'Shipped',
+      summary:'Moved deployments to Helm and brought in Terraform.',
+      metrics:[],
+      points:['Versioned Helm releases with one-step rollback and failure-rate tracking.', 'Introduced Terraform for infrastructure.'],
+      uses:['Helm','Terraform','Kubernetes','ArgoCD'] },
+    { id:'App Security', roles:['sde2','sde1'], status:'Shipped',
+      summary:'Hardened login, crypto and data access with zero client impact.',
+      metrics:[],
+      points:['JWT HS256 to ES256, SHA256 digests, CSRF/XSS protection, rate limiting.', 'SSO-only admin, 5-attempt lockout, CAPTCHA, OTP redesign, secure cookies.', 'Audited console access, a SQL sanitization wrapper and Postgres delete-guard triggers.'],
+      uses:['Encryption','IAM/RBAC','Ruby on Rails','PostgreSQL','SQL'] },
+    { id:'New Relic Rollout', roles:['sde1'], status:'Shipped',
+      summary:'Pioneered observability across the whole org.',
+      metrics:[['100%','of services covered']],
+      points:['Covered Sidekiq, MongoDB, Cloud SQL and Postgres.'],
+      uses:['New Relic','Tracing','PostgreSQL','MongoDB','Cloud SQL'] },
+    { id:'Daily DB Migrations', roles:['sde1'], status:'Shipped',
+      summary:'Made database migrations safe enough to ship every day.',
+      metrics:[['weekly → daily','migration deploys']],
+      points:['GoLive safeguards: safe-pg-migration and lock checks.'],
+      uses:['PostgreSQL','SQL','Ruby on Rails'] }
+];
+
+const ROOT = 'Abunachar';
+const ROOT_INFO = {
+    summary:'Site Reliability & DevSecOps Engineer (SDE3) at GoComet, Bangalore. Scales and secures high-availability platforms on GCP, AWS and Kubernetes.',
+    metrics:[['4+ yrs','SRE and DevSecOps'],['75%','faster incident recovery'],['99.9%','uptime'],['~INR 7-8 lakh','cloud cost saved / month']],
+    recognition:['Promoted 4 times in 4 years, intern to SDE3.', 'EMO of the Month (org-wide), May 2024.', 'Active in bug bounty and CTF.'],
+    links:[['GitHub','https://github.com/knight-byte'],['LinkedIn','https://in.linkedin.com/in/abunachar'],['Terminal','/']]
+};
+
+/* ---------- graph (needs d3 from the CDN) ---------- */
+function initGraph(){
+    if(window.matchMedia('(pointer: coarse)').matches){
+        document.getElementById('status').textContent = 'Drag to pan, pinch to zoom, tap a node for details.';
+    }
+    /* ---------- build graph ---------- */
+    const nodes = [], links = [], byId = new Map();
+    const PROJ = new Map(PROJECTS.map(p => [p.id, p]));
+    const ROLE = new Map(ROLES.map(r => [r.id, r]));
+    function addNode(n){ nodes.push(n); byId.set(n.id, n); return n; }
+
+    addNode({ id:ROOT, type:'root' });
+    for(const [cat, skills] of Object.entries(CATEGORIES)){
+        addNode({ id:cat, type:'hub', cat });
+        links.push({ source:ROOT, target:cat, kind:'root' });
+        for(const s of skills){
+            addNode({ id:s, type:'skill', cat });
+            links.push({ source:cat, target:s, kind:'hub' });
+        }
+    }
+    for(const p of PROJECTS){
+        addNode({ id:p.id, type:'project' });
+        for(const u of p.uses){
+            if(!byId.has(u)){ console.warn('unknown skill', u); continue; }
+            links.push({ source:p.id, target:u, kind:'proj' });
+        }
+    }
+
+    const adj = new Map(nodes.map(n => [n.id, new Set()]));
+    for(const l of links){ adj.get(l.source).add(l.target); adj.get(l.target).add(l.source); }
+
+    const colorOf = n => n.cat ? AREA_COLOR[n.cat] : n.type === 'root' ? 'var(--root)' : 'var(--project)';
+    const projectsOf = skill => PROJECTS.filter(p => p.uses.includes(skill));
+
+    function radius(n){
+        if(n.type === 'root') return 46;
+        if(n.type === 'hub') return 36;
+        if(n.type === 'project') return 9 + adj.get(n.id).size * 1.3;
+        return Math.min(4 + (adj.get(n.id).size - 1) * 2.4, 17);
+    }
+    nodes.forEach(n => n.r = radius(n));
+
+    /* ---------- render ---------- */
+    const svg = d3.select('#graph');
+    const stage = document.getElementById('stage');
+    let W = stage.clientWidth, H = stage.clientHeight;
+    const wide = () => W >= 900;
+    const PANEL_INSET = 390;
+
+    svg.append('defs').append('marker')
+        .attr('id','arrow').attr('viewBox','0 -4 8 8').attr('refX',8).attr('refY',0)
+        .attr('markerWidth',5).attr('markerHeight',5).attr('orient','auto')
+        .append('path').attr('d','M0,-4L8,0L0,4').attr('fill','rgba(205,211,222,.35)');
+
+    const world = svg.append('g');
+    // lines take the colour of the area they point into, so a project's reach reads at a glance
+    const linkSel = world.append('g').selectAll('line').data(links).join('line')
+        .attr('class', l => 'link ' + l.kind).attr('marker-end','url(#arrow)')
+        .style('--c', l => l.kind === 'root' ? null : colorOf(byId.get(l.target)));
+
+    const nodeSel = world.append('g').selectAll('g').data(nodes).join('g')
+        .attr('class', d => 'node ' + d.type)
+        .style('--c', d => colorOf(d));
+
+    nodeSel.filter(d => d.type === 'project').append('circle')
+        .attr('class','ring').attr('r', d => d.r + 3);
+    nodeSel.append('circle').attr('class','body').attr('r', d => d.r);
+
+    // labels inside big circles (wrapped), below small ones
+    nodeSel.filter(d => d.type === 'root' || d.type === 'hub').each(function(d){
+        const words = d.id.replace(' & ', ' & ').replace('Observability', 'Observ- ability').split(' ');
+        const longest = d3.max(words, w => w.length);
+        const fs = Math.min(d.type === 'root' ? 15 : 11, (d.r * 1.9) / (longest * 0.58));
+        const t = d3.select(this).append('text').attr('class','inside').attr('font-size', fs);
+        words.forEach((w, i) => t.append('tspan').attr('x', 0)
+            .attr('dy', i === 0 ? (-(words.length - 1) * 0.55 + 0.35) + 'em' : '1.1em').text(w));
+    });
+    nodeSel.filter(d => d.type === 'project' || d.type === 'skill').append('text')
+        .attr('class','outside').attr('dy', d => d.r + (d.type === 'project' ? 15 : 11)).text(d => d.id);
+
+    /* ---------- simulation ---------- */
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const sim = d3.forceSimulation(nodes)
+        .force('link', d3.forceLink(links).id(d => d.id)
+            .distance(l => l.kind === 'root' ? 210 : l.kind === 'hub' ? 45 + l.target.r * 1.5 : 110)
+            .strength(l => l.kind === 'proj' ? 0.07 : 0.9))
+        .force('charge', d3.forceManyBody().strength(d =>
+            d.type === 'skill' ? -80 : d.type === 'project' ? -300 : -1000))
+        .force('collide', d3.forceCollide(d => d.r + (d.type === 'skill' ? 6 : 14)))
+        .force('x', d3.forceX(0).strength(0.03))
+        .force('y', d3.forceY(0).strength(0.03))
+        .on('tick', render);
+
+    function render(){
+        linkSel.each(function(l){
+            const dx = l.target.x - l.source.x, dy = l.target.y - l.source.y;
+            const dist = Math.hypot(dx, dy) || 1;
+            const ux = dx / dist, uy = dy / dist;
+            const tr = l.target.r + (l.target.type === 'project' ? 6 : 2);
+            this.setAttribute('x1', l.source.x + ux * l.source.r);
+            this.setAttribute('y1', l.source.y + uy * l.source.r);
+            this.setAttribute('x2', l.target.x - ux * tr);
+            this.setAttribute('y2', l.target.y - uy * tr);
+        });
+        nodeSel.attr('transform', d => `translate(${d.x},${d.y})`);
+    }
+
+    // settle most of the layout up front so the first paint (and the fit-to-view) is already shaped
+    sim.stop();
+    for(let i = 0; i < (reduceMotion ? 400 : 160); i++) sim.tick();
+    render();
+    if(!reduceMotion) sim.restart();
+
+    /* ---------- zoom / pan / drag ---------- */
+    const zoom = d3.zoom().scaleExtent([0.25, 4]).on('zoom', e => {
+        world.attr('transform', e.transform);
+        svg.classed('zoomed', e.transform.k > 1.4);
+    });
+    svg.call(zoom).on('dblclick.zoom', null);
+    const inset = () => (wide() && !panel.hidden ? PANEL_INSET : 0);
+    function fitView(){
+        // keep the graph clear of the intro (top), legend (bottom) and panel (right) overlays
+        const pad = 24;
+        const top = W < 640 ? 70 : 110, bottom = W < 640 ? 110 : 64;
+        const availW = W - inset();
+        const x0 = d3.min(nodes, d => d.x - d.r), x1 = d3.max(nodes, d => d.x + d.r);
+        const y0 = d3.min(nodes, d => d.y - d.r), y1 = d3.max(nodes, d => d.y + d.r + 16);
+        const availH = H - top - bottom;
+        const k = Math.min(1.2, (availW - pad * 2) / (x1 - x0), availH / (y1 - y0));
+        svg.call(zoom.transform, d3.zoomIdentity.translate(availW / 2, top + availH / 2).scale(k)
+            .translate(-(x0 + x1) / 2, -(y0 + y1) / 2));
+    }
+
+    nodeSel.call(d3.drag()
+        .on('start', (e, d) => { if(!e.active && !reduceMotion) sim.alphaTarget(0.2).restart(); d.fx = d.x; d.fy = d.y; })
+        .on('drag',  (e, d) => { d.fx = e.x; d.fy = e.y; if(reduceMotion){ d.x = e.x; d.y = e.y; render(); } })
+        .on('end',   (e, d) => { if(!e.active) sim.alphaTarget(0); d.fx = null; d.fy = null; }));
+
+    /* ---------- highlight / selection ---------- */
+    let selected = null;     // node the graph is focused on
+    let panelId = null;      // node the panel is showing
+    let trail = [];          // panel back-stack
+    let activeRole = null;
+
+    function lightUp(ids){
+        if(!ids){ svg.classed('focus', false); nodeSel.classed('lit', false); linkSel.classed('lit', false); return; }
+        svg.classed('focus', true);
+        nodeSel.classed('lit', d => ids.has(d.id));
+        linkSel.classed('lit', l => ids.has(l.source.id) && ids.has(l.target.id));
+    }
+    function neighbourhood(id){ return new Set([id, ...adj.get(id)]); }
+    function roleSet(roleId){
+        const ids = new Set();
+        for(const p of PROJECTS) if(p.roles.includes(roleId)){ ids.add(p.id); p.uses.forEach(u => ids.add(u)); }
+        return ids;
+    }
+    function peek(id){ nodeSel.classed('peek', d => d.id === id); }
+
+    nodeSel
+        .on('mouseenter', (e, d) => { if(!selected && !activeCat && !activeRole) lightUp(neighbourhood(d.id)); })
+        .on('mouseleave', () => { if(!selected && !activeCat && !activeRole) lightUp(null); })
+        .on('click', (e, d) => { e.stopPropagation(); select(d.id); });
+    svg.on('click', () => clearSelection());
+
+    const panel = document.getElementById('panel');
+
+    function select(id, fly, fromTrail){
+        const d = byId.get(id);
+        if(!d) return;
+        if(!fromTrail && panelId && panelId !== id) trail.push(panelId);
+        selected = id;
+        activeRole = null;
+        setCategory(null, true);
+        nodeSel.classed('selected', n => n.id === id);
+        lightUp(neighbourhood(id));
+        openPanel(id);
+        if(fly) flyTo(d);
+    }
+    function flyTo(d){
+        const t = d3.zoomTransform(svg.node());
+        const k = Math.max(t.k, 1.2);
+        svg.transition().duration(reduceMotion ? 0 : 600)
+            .call(zoom.transform, d3.zoomIdentity.translate((W - inset()) / 2, H / 2).scale(k).translate(-d.x, -d.y));
+    }
+    function siblings(d){
+        if(d.type === 'project') return PROJECTS.map(p => p.id);
+        if(d.type === 'skill') return CATEGORIES[d.cat];
+        if(d.type === 'hub') return Object.keys(CATEGORIES);
+        return [];
+    }
+    function step(dir){
+        const d = byId.get(panelId);
+        if(!d) return;
+        const list = siblings(d);
+        if(list.length < 2) return;
+        const i = list.indexOf(d.id);
+        select(list[(i + dir + list.length) % list.length], true, true);
+    }
+
+    /* ---------- panel content ---------- */
+    function openPanel(id){
+        const d = byId.get(id);
+        panelId = id;
+        panel.innerHTML = '';
+        panel.style.setProperty('--c', colorOf(d));
+
+        // toolbar: back, prev / next, close
+        const bar = el('div', 'bar');
+        const back = iconBtn('← back', 'Back to ' + (trail[trail.length - 1] || ''), () => select(trail.pop(), true, true));
+        back.hidden = !trail.length;
+        const sib = siblings(d);
+        const i = sib.indexOf(d.id);
+        const prev = iconBtn('‹', 'Previous: ' + sib[(i - 1 + sib.length) % sib.length], () => step(-1));
+        const next = iconBtn('›', 'Next: ' + sib[(i + 1) % sib.length], () => step(1));
+        prev.hidden = next.hidden = sib.length < 2;
+        const close = iconBtn('×', 'Close panel', clearSelection);
+        bar.append(back, el('span', 'spacer'), prev, next, close);
+        panel.append(bar);
+
+        const KIND = { root:'engineer', hub:'skill area', skill:'skill', project:'project' };
+        const kind = el('div', 'kind', KIND[d.type]);
+        if(d.type === 'project') kind.append(el('span', 'badge', PROJ.get(id).status));
+        panel.append(kind, el('h2', '', d.id));
+
+        ({ root:rootPanel, hub:hubPanel, skill:skillPanel, project:projectPanel })[d.type](d);
+
+        if(sib.length > 1) panel.append(el('div', 'keys', `← → to step through ${d.type === 'hub' ? 'areas' : d.type + 's'}`));
+        panel.hidden = false;
+        panel.scrollTop = 0;
+    }
+
+    function rootPanel(){
+        panel.append(el('p', 'lead', ROOT_INFO.summary), stats(ROOT_INFO.metrics));
+        section('career', rolesList());
+        section('recognition', bullets(ROOT_INFO.recognition));
+        const row = el('div', 'links');
+        for(const [label, href] of ROOT_INFO.links){
+            const a = el('a', '', label);
+            a.href = href;
+            if(href.startsWith('http')){ a.target = '_blank'; a.rel = 'noopener'; }
+            row.append(a);
+        }
+        panel.append(row);
+    }
+    function rolesList(){
+        const wrap = el('div', 'roles');
+        for(const r of ROLES){
+            const count = PROJECTS.filter(p => p.roles.includes(r.id)).length;
+            const b = el('button', 'role');
+            b.type = 'button';
+            b.setAttribute('aria-pressed', 'false');
+            b.append(el('span', 't', r.title), el('span', 'p', r.period), el('span', 'n', count + ' projects'));
+            b.onclick = () => {
+                activeRole = activeRole === r.id ? null : r.id;
+                wrap.querySelectorAll('.role').forEach(x => {
+                    const on = x === b && activeRole;
+                    x.classList.toggle('active', !!on);
+                    x.setAttribute('aria-pressed', String(!!on));
+                });
+                lightUp(activeRole ? roleSet(activeRole) : selected ? neighbourhood(selected) : null);
+            };
+            wrap.append(b);
+        }
+        wrap.append(el('div', 'hint', 'Pick a role to light up the work from that period.'));
+        return wrap;
+    }
+
+    function hubPanel(d){
+        const skills = CATEGORIES[d.id].map(s => byId.get(s))
+            .map(n => ({ n, count:projectsOf(n.id).length }))
+            .sort((a, b) => b.count - a.count || a.n.id.localeCompare(b.n.id));
+        const projs = PROJECTS.filter(p => p.uses.some(u => CATEGORIES[d.id].includes(u)));
+        panel.append(el('p', 'lead', AREA_BLURB[d.id]),
+            stats([[String(skills.length), 'skills'], [String(projs.length), 'projects use them']]));
+        const row = el('div', 'nbrs');
+        skills.forEach(({ n, count }) => row.append(chip(n, count)));
+        section('skills, by how often they show up', row);
+        section('projects', cards(projs));
+    }
+
+    function skillPanel(d){
+        const projs = projectsOf(d.id);
+        const roles = ROLES.filter(r => projs.some(p => p.roles.includes(r.id)));
+        panel.append(el('p', 'lead', SKILL_NOTE[d.id] || `Part of the ${d.cat} toolkit.`));
+        if(roles.length){
+            const since = Math.min(...roles.map(r => r.from));
+            panel.append(el('div', 'meta', `Used since ${since}, across ${roles.length} role${roles.length > 1 ? 's' : ''}`));
+        }
+        const area = el('div', 'nbrs');
+        area.append(chip(byId.get(d.cat)));
+        section('area', area);
+        if(projs.length) section(`used in ${projs.length} project${projs.length > 1 ? 's' : ''}`, cards(projs));
+        else panel.append(el('p', 'empty', 'Listed on the resume, not tied to a specific project here.'));
+
+        // skills that show up in the same projects, most shared first
+        const count = new Map();
+        for(const p of projs) for(const u of p.uses) if(u !== d.id) count.set(u, (count.get(u) || 0) + 1);
+        const related = [...count].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 8);
+        if(related.length){
+            const row = el('div', 'nbrs');
+            related.forEach(([s]) => row.append(chip(byId.get(s))));
+            section('often paired with', row);
+        }
+    }
+
+    function projectPanel(d){
+        const p = PROJ.get(d.id);
+        const roles = p.roles.map(r => ROLE.get(r)).sort((a, b) => a.from - b.from);
+        panel.append(el('div', 'meta', `As ${roles.map(r => r.short).join(' and ')}, ${span(roles)}`));
+        panel.append(el('p', 'lead', p.summary));
+        if(p.metrics.length) panel.append(stats(p.metrics));
+        section('what was done', bullets(p.points));
+        // stack grouped by area colour order, so the chips read like the legend
+        const order = Object.keys(CATEGORIES);
+        const row = el('div', 'nbrs');
+        p.uses.map(u => byId.get(u))
+            .sort((a, b) => order.indexOf(a.cat) - order.indexOf(b.cat))
+            .forEach(n => row.append(chip(n)));
+        section('stack', row);
+    }
+    function span(roles){
+        const start = roles.map(r => r.period.split(' - ')[0]).sort((a, b) => new Date('1 ' + a) - new Date('1 ' + b))[0];
+        const ends = roles.map(r => r.period.split(' - ')[1]);
+        const end = ends.includes('Present') ? 'Present' : ends.sort((a, b) => new Date('1 ' + b) - new Date('1 ' + a))[0];
+        return `${start} - ${end}`;
+    }
+
+    /* ---------- panel building blocks ---------- */
+    function section(title, body){ panel.append(el('h3', '', title), body); }
+    function stats(list){
+        const wrap = el('div', 'stats');
+        for(const [v, l] of list){
+            const s = el('div', 'stat');
+            s.append(el('b', '', v), el('span', '', l));
+            wrap.append(s);
+        }
+        return wrap;
+    }
+    function bullets(list){
+        const ul = el('ul', 'points');
+        list.forEach(t => ul.append(el('li', '', t)));
+        return ul;
+    }
+    function cards(projs){
+        const wrap = el('div', 'cards');
+        for(const p of projs){
+            const b = el('button', 'card');
+            b.type = 'button';
+            const title = el('b', '', p.id);
+            if(p.status !== 'Shipped') title.append(el('em', '', p.status.toLowerCase()));
+            b.append(title, el('span', '', p.summary));
+            linkTo(b, p.id);
+            wrap.append(b);
+        }
+        return wrap;
+    }
+    function chip(n, count){
+        const b = el('button', 'chip' + (n.type === 'project' ? ' proj' : ''), n.id);
+        b.type = 'button';
+        b.style.setProperty('--c', colorOf(n));
+        if(count != null) b.append(el('span', 'n', String(count)));
+        linkTo(b, n.id);
+        return b;
+    }
+    // every link in the panel previews its node on the graph, and opens it on click
+    function linkTo(elem, id){
+        elem.addEventListener('mouseenter', () => peek(id));
+        elem.addEventListener('mouseleave', () => peek(null));
+        elem.addEventListener('focus', () => peek(id));
+        elem.addEventListener('blur', () => peek(null));
+        elem.addEventListener('click', () => { peek(null); select(id, true); });
+    }
+    function iconBtn(label, aria, onClick){
+        const b = el('button', 'iconbtn', label);
+        b.type = 'button';
+        b.setAttribute('aria-label', aria);
+        b.title = aria;
+        b.onclick = onClick;
+        return b;
+    }
+    function el(tag, cls, text){
+        const e = document.createElement(tag);
+        if(cls) e.className = cls;
+        if(text != null) e.textContent = text;
+        return e;
+    }
+    function clearSelection(){
+        selected = null;
+        panelId = null;
+        trail = [];
+        activeRole = null;
+        panel.hidden = true;
+        peek(null);
+        nodeSel.classed('selected', false);
+        lightUp(activeCat ? categorySet(activeCat) : null);
+    }
+
+    /* ---------- legend: filter by area ---------- */
+    const legend = document.getElementById('legend');
+    let activeCat = null;
+    const catButtons = {};
+
+    function categorySet(cat){
+        if(cat === '__projects'){
+            return new Set(nodes.filter(n => n.type === 'project').map(n => n.id));
+        }
+        const ids = new Set([cat, ...CATEGORIES[cat]]);
+        for(const s of CATEGORIES[cat]) for(const n of adj.get(s)) if(byId.get(n).type === 'project') ids.add(n);
+        return ids;
+    }
+    function setCategory(cat, silent){
+        activeCat = cat;
+        for(const [k, b] of Object.entries(catButtons)){
+            b.classList.toggle('active', k === cat);
+            b.setAttribute('aria-pressed', String(k === cat));
+        }
+        if(!silent) { selected = null; panelId = null; trail = []; panel.hidden = true; nodeSel.classed('selected', false); lightUp(cat ? categorySet(cat) : null); }
+    }
+    for(const cat of [...Object.keys(CATEGORIES), '__projects']){
+        const isProj = cat === '__projects';
+        const b = el('button', 'chip key' + (isProj ? ' proj' : ''), isProj ? 'Projects' : cat);
+        b.type = 'button';
+        b.style.setProperty('--c', isProj ? 'var(--project)' : AREA_COLOR[cat]);
+        b.setAttribute('aria-pressed', 'false');
+        b.onclick = e => { e.stopPropagation(); setCategory(activeCat === cat ? null : cat); };
+        catButtons[cat] = b;
+        legend.append(b);
+    }
+
+    /* ---------- search ---------- */
+    const search = document.getElementById('search');
+    const list = document.getElementById('nodeList');
+    nodes.map(n => n.id).sort().forEach(id => { const o = document.createElement('option'); o.value = id; list.append(o); });
+    function findNode(q){
+        q = q.trim().toLowerCase();
+        if(!q) return null;
+        return nodes.find(n => n.id.toLowerCase() === q) || nodes.find(n => n.id.toLowerCase().includes(q));
+    }
+    const searchBox = document.getElementById('searchBox');
+    const status = document.getElementById('status');
+    const statusDefault = status.textContent;
+    function setStatus(msg){
+        const miss = msg != null;
+        status.textContent = miss ? msg : statusDefault;
+        status.classList.toggle('miss', miss);
+        searchBox.classList.toggle('miss', miss);
+        search.setAttribute('aria-invalid', String(miss));
+    }
+    search.addEventListener('keydown', e => {
+        if(e.key === 'Enter'){
+            const n = findNode(search.value);
+            if(n){ setStatus(null); select(n.id, true); }
+            else if(search.value.trim()) setStatus(`Nothing matches "${search.value.trim()}". Try a tool like Terraform or a project like Prism.`);
+        }
+        if(e.key === 'Escape'){ search.value = ''; setStatus(null); clearSelection(); search.blur(); }
+    });
+    search.addEventListener('input', () => setStatus(null));
+    search.addEventListener('change', () => { const n = nodes.find(x => x.id === search.value); if(n) select(n.id, true); });
+    document.addEventListener('keydown', e => {
+        const typing = document.activeElement === search;
+        if(e.key === '/' && !typing){ e.preventDefault(); search.focus(); }
+        if(e.key === 'Escape' && !typing){ setCategory(null); clearSelection(); }
+        if(!typing && panelId && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')){
+            e.preventDefault();
+            step(e.key === 'ArrowLeft' ? -1 : 1);
+        }
+    });
+
+    /* ---------- first view ---------- */
+    // on wide screens, open the overview so the page explains itself before any click
+    if(wide()) openPanel(ROOT);
+    fitView();
+
+    /* ---------- resize ---------- */
+    window.addEventListener('resize', () => {
+        const t = d3.zoomTransform(svg.node());
+        const nW = stage.clientWidth, nH = stage.clientHeight;
+        svg.call(zoom.transform, t.translate((nW - W) / 2 / t.k, (nH - H) / 2 / t.k));
+        W = nW; H = nH;
+    });
+}
+
+/* ---------- fallback: CDN blocked or offline ---------- */
+function renderFallback(){
+    const stage = document.getElementById('stage');
+    stage.querySelector('svg').remove();
+    stage.querySelector('.legend').remove();
+    stage.querySelector('.intro').remove();
+    document.getElementById('searchBox').hidden = true;
+    const wrap = document.createElement('div');
+    wrap.className = 'fallback';
+    const note = document.createElement('p');
+    note.className = 'fallback-note';
+    note.textContent = "The interactive graph couldn't load, so here is the same data as a list.";
+    wrap.append(note);
+    for(const [cat, skills] of Object.entries(CATEGORIES)){
+        const group = document.createElement('section');
+        group.style.setProperty('--c', AREA_COLOR[cat]);
+        const h = document.createElement('h2');
+        h.textContent = cat;
+        const row = document.createElement('div');
+        row.className = 'chips';
+        skills.forEach(s => { const c = document.createElement('span'); c.textContent = s; row.append(c); });
+        group.append(h, row);
+        wrap.append(group);
+    }
+    const pg = document.createElement('section');
+    const ph = document.createElement('h2');
+    ph.textContent = 'Projects';
+    pg.append(ph);
+    for(const p of PROJECTS){
+        const item = document.createElement('p');
+        item.innerHTML = '<b></b> ';
+        item.querySelector('b').textContent = p.id + '.';
+        item.append(p.summary);
+        pg.append(item);
+    }
+    wrap.append(pg);
+    stage.append(wrap);
+}
+
+if(window.d3) initGraph();
+else renderFallback();
+</script>
+</body>
+</html>
