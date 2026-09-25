@@ -635,12 +635,26 @@ bar.addEventListener('pointerdown', (e) => {
 
 /* ---------- boot sequence ---------- */
 const boot = [
-    { text: 'ssh guest@abunachar.com', cls: 'fg', delay: 200 },
+    { text: 'ssh guest@abunachar.com', cmd: true, delay: 260 },
     { text: 'last login: ' + new Date().toLocaleString(), cls: 'muted', delay: 200 },
     { text: 'access granted - welcome', cls: 'green', delay: 240 },
     { text: '', cls: '', delay: 80 }
 ];
 let i = 0;
+// local shell prompt, typed out like a real ssh login
+function typeCmd(text, done){
+    const line = document.createElement('div');
+    line.className = 'promptline';
+    line.innerHTML = '<span class="sym">$</span><span class="typed"></span>';
+    screen.appendChild(line);
+    const out = line.querySelector('.typed');
+    if(matchMedia('(prefers-reduced-motion:reduce)').matches){ out.textContent = text; return done(); }
+    let n = 0;
+    (function tick(){
+        out.textContent = text.slice(0, ++n);
+        n < text.length ? setTimeout(tick, 35 + Math.random() * 45) : done();
+    })();
+}
 function playBoot(){
     if(i >= boot.length){
         printIdentity();
@@ -652,8 +666,9 @@ function playBoot(){
         return;
     }
     const b = boot[i];
-    if(b.text !== '') addLine(b.text, b.cls);
     i++;
+    if(b.cmd) return typeCmd(b.text, () => setTimeout(playBoot, b.delay));
+    if(b.text !== '') addLine(b.text, b.cls);
     setTimeout(playBoot, b.delay);
 }
 playBoot();
