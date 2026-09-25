@@ -271,7 +271,10 @@ svg.focus .link.lit{ stroke:color-mix(in srgb, var(--c, var(--fg)) 90%, transpar
 @keyframes panel-in{ from{ opacity:0; transform:translateX(8px); } to{ opacity:1; transform:none; } }
 
 @media (max-width:640px){
-    body{ padding:36px 6px 64px; }
+    /* iPhone: full-screen app between status bar and home indicator (/desktop.css) */
+    body{ padding:48px 0 30px; }
+    .window,.window.max{ position:static; border:0; border-radius:0; }
+    .dot{ display:none; }
     .path{ display:none; }
     .search{ flex:1 1 100%; order:5; margin-left:0; min-width:0; }
     .search input{ flex:1; width:auto; min-width:0; }

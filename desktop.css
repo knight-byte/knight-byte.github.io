@@ -58,12 +58,27 @@
 .dock .app.bounce{ animation:bounce .9s cubic-bezier(.3,0,.3,1); }
 @keyframes bounce{ 0%,50%,100%{ transform:none; } 25%,75%{ transform:translateY(-22px); } }
 .dock .sep{ width:1px; height:38px; background:rgba(255,255,255,.22); margin-bottom:3px; align-self:center; }
+/* ============ iPhone chrome (phones): status bar + home indicator replace menubar + dock ============ */
+.sbar,.homebar{ display:none; }
 @media (max-width:620px){
-    :root{ --dock-h:60px; }
-    .menubar .menus{ display:none; }
-    .dock{ gap:8px; padding:5px 8px 7px; height:48px; }
-    .dock .app{ --sz:36px; }
-    .dock .sep{ height:30px; }
+    :root{ --menubar-h:48px; --dock-h:30px; }
+    .menubar,.dock{ display:none; }
+    .sbar{
+        position:fixed; top:0; left:0; right:0; z-index:50; height:48px; padding:0 28px 0 32px;
+        display:flex; justify-content:space-between; align-items:center; pointer-events:none;
+        font:600 16px -apple-system,BlinkMacSystemFont,'Inter',sans-serif; color:#fff;
+    }
+    .sbar .r{ display:flex; gap:6px; align-items:center; }
+    .sig{ display:flex; gap:2px; align-items:flex-end; height:11px; }
+    .sig i{ width:3px; background:#fff; border-radius:1px; }
+    .sig i:nth-child(1){ height:4px; } .sig i:nth-child(2){ height:6px; } .sig i:nth-child(3){ height:8px; } .sig i:nth-child(4){ height:11px; }
+    .sbar .bat{ width:25px; height:12px; border-color:rgba(255,255,255,.5); border-width:1.5px; border-radius:4px; }
+    /* home indicator: tap or swipe up to go home */
+    .homebar{
+        display:block; position:fixed; left:50%; bottom:0; translate:-50% 0; z-index:50;
+        width:180px; height:30px; border:0; padding:0; background:none; cursor:pointer; touch-action:none;
+    }
+    .homebar::before{ content:""; position:absolute; left:23px; right:23px; bottom:8px; height:5px; border-radius:3px; background:#fff; }
 }
 @media (prefers-reduced-motion:reduce){
     .dock .app{ transition:none; } .dock .app.bounce{ animation:none; }

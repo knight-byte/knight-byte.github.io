@@ -23,12 +23,26 @@ body.insertAdjacentHTML('beforeend', `<nav class="dock" id="dock" aria-label="Do
     <a class="app i-mail" href="mailto:hello@abunachar.com" aria-label="Mail"><svg class="icon" viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M224,48H32a8,8,0,0,0-8,8V192a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A8,8,0,0,0,224,48Zm-8,144H40V74.19l82.59,75.71a8,8,0,0,0,10.82,0L216,74.19V192Z"/></svg><span class="badge" aria-hidden="true">1</span></a>
 </nav>`);
 
+// phones get iPhone chrome instead (see desktop.css): status bar + home indicator
+body.insertAdjacentHTML('beforeend', `<div class="sbar" aria-hidden="true"><span id="sbarClock"></span>
+    <span class="r"><span class="sig"><i></i><i></i><i></i><i></i></span><span class="bat"></span></span></div>
+<button type="button" class="homebar" id="homebar" aria-label="Home screen"></button>`);
+
+/* home indicator: pages can handle 'ios-home' themselves (preventDefault), otherwise go to the home page */
+const homebar = document.getElementById('homebar');
+const goHome = () => { if(dispatchEvent(new Event('ios-home', { cancelable:true }))) location.href = '/'; };
+let hy = null;
+homebar.addEventListener('pointerdown', (e) => { hy = e.clientY; });
+homebar.addEventListener('pointerup', (e) => { if(hy !== null && hy - e.clientY > 20) goHome(); hy = null; });
+homebar.addEventListener('click', goHome);
+
 /* menubar clock */
 const clock = document.getElementById('barClock');
 function tick(){
     const d = new Date();
     clock.textContent = d.toLocaleDateString(undefined, { weekday:'short', day:'numeric', month:'short' }) + ' ' +
         d.toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
+    document.getElementById('sbarClock').textContent = d.toLocaleTimeString([], { hour:'numeric', minute:'2-digit' }).replace(/\s?[AP]M$/i, '');
 }
 tick();
 setInterval(tick, 1000);

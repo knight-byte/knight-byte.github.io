@@ -230,6 +230,39 @@ button.dot:focus-visible{ outline:2px solid var(--fg); outline-offset:2px; }
 
 @media (prefers-reduced-motion:reduce){ .window,.status::before{animation:none;} }
 
+/* ============ SPRINGBOARD: iPhone home screen, phones only ============ */
+.springboard{ display:none; }
+@media (max-width:620px){
+    .springboard{
+        display:block; position:fixed; inset:0; padding:62px 24px 0; color:#fff;
+        font-family:-apple-system,BlinkMacSystemFont,'Inter',sans-serif; transition:scale .35s, opacity .35s;
+    }
+    body:has(.window:not(.min):not(.closed)) .springboard{ scale:.92; opacity:.4; }
+}
+.glass{
+    background:linear-gradient(150deg,rgba(255,255,255,.22),rgba(255,255,255,.06) 50%,rgba(255,255,255,.12));
+    backdrop-filter:blur(18px) saturate(1.8); -webkit-backdrop-filter:blur(18px) saturate(1.8);
+    box-shadow:inset 1px 1px 0 rgba(255,255,255,.45), inset -1px -1px 0 rgba(255,255,255,.12), 0 8px 24px rgba(0,0,0,.2);
+}
+.widget{ display:flex; gap:14px; align-items:center; width:100%; padding:16px; border:0; border-radius:24px; color:inherit; font:inherit; text-align:left; cursor:pointer; }
+.widget img{ width:62px; height:62px; border-radius:50%; object-fit:cover; }
+.widget b{ display:block; font-size:18px; }
+.widget span{ display:block; margin-top:2px; font-size:13px; opacity:.8; }
+.widget em{ display:inline-flex; gap:6px; align-items:center; margin-top:8px; font-style:normal; font-size:12px; font-weight:600; color:var(--ansi-green); }
+.widget em::before{ content:""; width:7px; height:7px; border-radius:50%; background:var(--ansi-green); box-shadow:0 0 8px var(--ansi-green); }
+.wlabel{ margin:6px 0 20px; text-align:center; font-size:12px; font-weight:500; opacity:.9; }
+.sb-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:22px 0; justify-items:center; }
+.ic{ display:grid; justify-items:center; gap:6px; padding:0; border:0; background:none; font:500 12px -apple-system,BlinkMacSystemFont,'Inter',sans-serif; color:#fff; text-decoration:none; text-shadow:0 1px 4px rgba(0,0,0,.4); cursor:pointer; }
+.ic .t{ width:60px; height:60px; border-radius:14px; display:grid; place-items:center; position:relative; box-shadow:0 2px 6px rgba(0,0,0,.3); }
+.ic:active .t{ scale:.9; filter:brightness(.8); }
+.ic .t .icon{ width:32px; height:32px; }
+.ic .t img{ width:100%; height:100%; border-radius:inherit; object-fit:cover; }
+.ic .t .p{ position:absolute; left:10px; top:8px; font:500 17px/1 'JetBrains Mono',monospace; }
+.ic .badge{ position:absolute; top:-6px; right:-6px; min-width:22px; height:22px; padding:0 6px; border-radius:99px; background:#ff3b30; font:600 13px/22px -apple-system,'Inter',sans-serif; text-align:center; }
+.sb-search{ position:fixed; bottom:124px; left:50%; translate:-50% 0; padding:6px 14px; border-radius:99px; font-size:13px; font-weight:600; }
+.sb-dock{ position:fixed; left:12px; right:12px; bottom:16px; height:92px; border-radius:36px; display:flex; justify-content:space-around; align-items:center; }
+.sb-dock .ic > span:last-child{ display:none; }
+
 /* ============ LOCK SCREEN (menubar + dock live in /desktop.css) ============ */
 
 .lock{
@@ -257,6 +290,25 @@ button.dot:focus-visible{ outline:2px solid var(--fg); outline-offset:2px; }
 .lock .who img{ width:64px; height:64px; border-radius:50%; object-fit:cover; box-shadow:0 4px 16px rgba(0,0,0,.35); }
 .lock .name{ margin-top:10px; font-size:.95rem; font-weight:600; text-shadow:0 1px 8px rgba(0,0,0,.3); }
 .lock .hint{ margin-top:10px; font-size:.75rem; font-weight:500; color:rgba(255,255,255,.7); text-shadow:0 1px 6px rgba(0,0,0,.35); }
+.lock .notif,.lock .quick,.lock .hint .m{ display:none; }
+@media (max-width:620px){
+    /* iPhone lock: notification + flashlight/camera instead of the login avatar */
+    .lock .tray,.lock .who > img,.lock .name,.lock .hint .d{ display:none; }
+    .lock .clock{ top:64px; }
+    .lock .date{ font-size:19px; }
+    .lock .time{ font-size:104px; }
+    .lock .who{ bottom:34px; padding:0 12px; }
+    .lock .notif{ display:flex; gap:10px; width:100%; padding:12px 14px; border-radius:22px; text-align:left; font-size:14px; }
+    .lock .notif img{ width:38px; height:38px; border-radius:9px; }
+    .lock .notif b{ font-size:15px; }
+    .lock .notif p{ margin-top:1px; opacity:.85; }
+    .lock .notif small{ margin-left:auto; font-size:13px; opacity:.6; }
+    .lock .quick{ display:flex; justify-content:space-between; width:100%; padding:18px 34px 0; }
+    .lock .quick span{ width:50px; height:50px; border-radius:50%; display:grid; place-items:center; }
+    .lock .quick svg{ width:22px; height:22px; }
+    .lock .hint{ margin-top:14px; font-size:14px; }
+    .lock .hint .m{ display:inline; }
+}
 @media (prefers-reduced-motion:reduce){
     .lock{ transition:opacity .2s; } .lock.open{ translate:none; opacity:0; }
 }
@@ -270,20 +322,18 @@ main{
 }
 
 @media (max-width:620px){
-    body{
-        padding:40px 12px 72px;
-        overflow:auto;
-        align-items:flex-start;
+    body{ padding:0; }
+    /* the window is a full-screen app that zooms out of the tapped icon */
+    .window,.window.max{
+        position:fixed; inset:0; z-index:25; width:auto; height:auto; max-width:none;
+        border:0; border-radius:0; padding-top:48px; translate:none !important;
+        transform-origin:var(--ox,50%) var(--oy,90%);
     }
-    main{ align-items:flex-start; }
-    .window{
-        width:100%;
-        height:auto;
-        min-height:min(480px, calc(100dvh - 112px));
-        max-height:calc(100dvh - 112px);
-        border-radius:8px;
-    }
-    .titlebar span.path{ left:80px; right:14px; text-align:left; font-size:.68rem; }
+    .window.min,.window.closed{ transform:scale(.12); opacity:0; border-radius:48px; }
+    .titlebar{ height:40px; cursor:default; }
+    .titlebar .dot{ display:none; }
+    .titlebar span.path{ left:14px; right:14px; font:600 15px -apple-system,BlinkMacSystemFont,'Inter',sans-serif; color:var(--fg); }
+    .screen{ padding-bottom:40px; }
     .screen{
         padding:14px 16px;
         font-size:.8rem;
@@ -384,7 +434,30 @@ main{
     <div class="who">
         <img src="avatar.png" alt="" width="64" height="64">
         <div class="name">Guest</div>
-        <div class="hint">Click or swipe up to unlock</div>
+        <div class="notif glass"><img src="avatar.png" alt="" width="38" height="38"><div><b>abunachar</b><p>all systems provisioned, no drift detected</p></div><small>now</small></div>
+        <div class="quick" aria-hidden="true">
+            <span class="glass"><svg viewBox="0 0 256 256"><path fill="#fff" d="M184,16H72A16,16,0,0,0,56,32V72a8.16,8.16,0,0,0,.4,2.53L72,121.28V232a16,16,0,0,0,16,16h80a16,16,0,0,0,16-16V121.28l15.6-46.75A8.16,8.16,0,0,0,200,72V32A16,16,0,0,0,184,16Zm-48,128a8,8,0,0,1-16,0V112a8,8,0,0,1,16,0Zm48-80H72V32H184Z"/></svg></span>
+            <span class="glass"><svg viewBox="0 0 256 256"><path fill="#fff" d="M208,56H180.28L166.65,35.56A8,8,0,0,0,160,32H96a8,8,0,0,0-6.65,3.56L75.71,56H48A24,24,0,0,0,24,80V192a24,24,0,0,0,24,24H208a24,24,0,0,0,24-24V80A24,24,0,0,0,208,56Zm-44,76a36,36,0,1,1-36-36A36,36,0,0,1,164,132Z"/></svg></span>
+        </div>
+        <div class="hint"><span class="d">Click or swipe up to unlock</span><span class="m">Swipe up to open</span></div>
+    </div>
+</div>
+
+<!-- iPhone home screen (phones only); icon glyphs are copied from the dock by script -->
+<div class="springboard" id="springboard">
+    <button type="button" class="widget glass" data-open="gui"><img src="avatar.png" alt="" width="62" height="62"><div><b>Abunachar</b><span>DevSecOps &amp; Cloud Infrastructure</span><em>Available for opportunities</em></div></button>
+    <div class="wlabel">Profile</div>
+    <div class="sb-grid">
+        <button type="button" class="ic" data-open="gui"><span class="t"><img src="avatar.png" alt="" width="60" height="60"></span><span>Profile</span></button>
+        <a class="ic" href="/skills/"><span class="t i-skills" data-from="i-skills"></span><span>Skills</span></a>
+        <a class="ic" href="https://in.linkedin.com/in/abunachar" target="_blank" rel="noopener"><span class="t i-li" data-from="i-li"></span><span>LinkedIn</span></a>
+    </div>
+    <div class="sb-search glass" aria-hidden="true">Search</div>
+    <div class="sb-dock glass">
+        <button type="button" class="ic" data-open="term"><span class="t i-term"><span class="p">&gt;_</span></span><span>Terminal</span></button>
+        <a class="ic" href="https://t.me/abunachar" target="_blank" rel="noopener"><span class="t i-tg" data-from="i-tg"></span><span>Telegram</span></a>
+        <a class="ic" href="mailto:hello@abunachar.com"><span class="t i-mail" data-from="i-mail"></span><span>Mail</span></a>
+        <a class="ic" href="https://github.com/knight-byte" target="_blank" rel="noopener"><span class="t i-gh" data-from="i-gh"></span><span>GitHub</span></a>
     </div>
 </div>
 
@@ -791,6 +864,15 @@ function playBoot(){
     setTimeout(playBoot, b.delay);
 }
 
+/* ---------- boot once, on unlock (desktop) or first open of the Terminal app (phone) ---------- */
+const phone = () => matchMedia('(max-width:620px)').matches;
+let booted = false;
+function startBoot(delay){
+    if(booted) return;
+    booted = true;
+    setTimeout(playBoot, delay || 0);
+}
+
 /* ---------- lock screen clock ---------- */
 const lock = document.getElementById('lock');
 function tickClock(){
@@ -811,7 +893,7 @@ function unlock(){
     lock.setAttribute('aria-hidden', 'true');
     lock.tabIndex = -1;
     try{ sessionStorage.setItem('unlocked', '1'); }catch(e){}
-    setTimeout(playBoot, 350);
+    if(!phone()) startBoot(350); // on a phone the terminal boots when its app is opened
 }
 lock.addEventListener('pointerdown', (e) => {
     const y0 = e.clientY, t0 = performance.now();
@@ -838,6 +920,21 @@ else lock.focus();
 /* ---------- dock: on this page Terminal / Profile switch views instead of navigating ---------- */
 document.getElementById('dockTerm').addEventListener('click', (e) => { e.preventDefault(); setMode(false); });
 document.getElementById('dockGui').addEventListener('click', (e) => { e.preventDefault(); setMode(true); });
+
+/* ---------- iPhone: springboard apps open full screen, home indicator backgrounds them ---------- */
+document.querySelectorAll('#springboard [data-from]').forEach(t => {
+    t.innerHTML = document.querySelector('#dock .' + t.dataset.from).innerHTML;
+});
+document.querySelectorAll('#springboard [data-open]').forEach(el => el.addEventListener('click', () => {
+    const r = (el.querySelector('.t') || el).getBoundingClientRect();
+    win.style.setProperty('--ox', r.left + r.width / 2 + 'px');
+    win.style.setProperty('--oy', r.top + r.height / 2 + 'px');
+    setMode(el.dataset.open === 'gui');
+    startBoot(300);
+}));
+addEventListener('ios-home', (e) => { e.preventDefault(); if(phone()) hideWindow('min'); });
+if(phone()){ win.style.transition = 'none'; win.classList.add('min'); requestAnimationFrame(() => win.style.removeProperty('transition')); }
+
 if(location.hash === '#gui') setMode(true);
 </script>
 </body>
