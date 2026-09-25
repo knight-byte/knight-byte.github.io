@@ -1,4 +1,6 @@
 /* shared macOS chrome for every page: menubar + dock (markup injected by /desktop.js) */
+/* space a maximized window leaves free, like macOS zoom: below menubar, above dock */
+:root{ --menubar-h:28px; --dock-h:70px; }
 .menubar{
     position:fixed; top:0; left:0; right:0; z-index:20; height:28px;
     display:flex; align-items:center; gap:18px; padding:0 14px;
@@ -56,6 +58,7 @@
 @keyframes bounce{ 0%,50%,100%{ transform:none; } 25%,75%{ transform:translateY(-22px); } }
 .dock .sep{ width:1px; height:38px; background:rgba(255,255,255,.22); margin-bottom:3px; align-self:center; }
 @media (max-width:620px){
+    :root{ --dock-h:60px; }
     .menubar .menus{ display:none; }
     .dock{ gap:8px; padding:5px 8px 7px; }
     .dock .app{ --sz:36px; }

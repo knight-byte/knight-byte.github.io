@@ -135,9 +135,9 @@ button.dot:focus-visible{ outline:2px solid var(--fg); outline-offset:2px; }
 @media (prefers-reduced-motion:reduce){ .window,.window.min,.window.closed{ transition:none; transform:none; } }
 /* maximized: pinned to viewport edges, drag offset ignored */
 .window.max{
-    position:fixed; inset:28px 0 0; z-index:10;
+    position:fixed; inset:var(--menubar-h) 0 var(--dock-h); z-index:10;
     width:auto; height:auto; max-width:none; max-height:none; min-height:0;
-    border:0; border-radius:0; translate:none !important;
+    translate:none !important;
 }
 .window.max .titlebar{ cursor:default; }
 .titlebar span.path{ position:absolute; left:80px; right:80px; text-align:center; font-size:.74rem; color:var(--muted); pointer-events:none; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
