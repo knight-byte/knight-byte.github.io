@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Abunachar — DevSecOps & Cloud Infrastructure Engineer</title>
+<title>Abunachar | DevSecOps & Cloud Infrastructure Engineer</title>
 <meta name="description" content="Abunachar is a DevSecOps engineer specializing in secure cloud infrastructure and security hardening. See projects, GitHub, and contact links.">
 <meta name="author" content="Abunachar">
 <meta name="robots" content="index, follow">
@@ -16,13 +16,13 @@
 
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://abunachar.com/">
-<meta property="og:title" content="Abunachar — DevSecOps & Cloud Infrastructure Engineer">
+<meta property="og:title" content="Abunachar | DevSecOps & Cloud Infrastructure Engineer">
 <meta property="og:description" content="DevSecOps engineer specializing in secure cloud infrastructure and security hardening.">
 <meta property="og:image" content="https://abunachar.com/avatar.png">
 <meta property="og:site_name" content="Abunachar">
 
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Abunachar — DevSecOps & Cloud Infrastructure Engineer">
+<meta name="twitter:title" content="Abunachar | DevSecOps & Cloud Infrastructure Engineer">
 <meta name="twitter:description" content="DevSecOps engineer specializing in secure cloud infrastructure and security hardening.">
 <meta name="twitter:image" content="https://abunachar.com/avatar.png">
 
@@ -83,6 +83,7 @@
     --gui-accent:#7dd3a8;
 }
 *{ margin:0; padding:0; box-sizing:border-box; }
+[hidden]{ display:none !important; }
 html,body{ height:100%; }
 body{
     font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
@@ -222,6 +223,33 @@ button.dot:hover,button.dot:focus-visible{ opacity:1; outline:none; }
 }
 .inputrow input::placeholder{ color:var(--muted); }
 .inputrow .hint{ font-size:.66rem; color:var(--muted); flex-shrink:0; }
+.inputrow{ position:relative; }
+
+.suggest{
+    position:absolute; left:14px; right:14px; bottom:calc(100% + 6px);
+    display:flex; flex-direction:column; padding:4px;
+    background:var(--chrome); border:1px solid var(--border); border-radius:10px;
+    box-shadow:0 -12px 30px -12px rgba(0,0,0,.6);
+}
+.suggest-item{
+    display:flex; align-items:baseline; gap:12px; width:100%; text-align:left;
+    padding:6px 10px; border:none; border-radius:4px; background:none; cursor:pointer;
+    font-family:inherit; font-size:.78rem; color:var(--fg);
+}
+.suggest-item .name{ color:var(--ansi-green); min-width:84px; }
+.suggest-item .desc{ color:var(--muted); font-size:.72rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.suggest-item:hover,
+.suggest-item.active{ background:rgba(125,207,186,.1); }
+.suggest-item.active .name{ color:var(--ansi-cyan); }
+.suggest-item:active{ transform:translateY(1px); }
+.suggest-item:focus-visible{ outline:1px solid var(--ansi-cyan); outline-offset:-1px; }
+.suggest-empty{ padding:6px 10px; font-size:.74rem; color:var(--muted); }
+.suggest-empty b{ color:var(--ansi-green); font-weight:400; }
+@media (prefers-reduced-motion:no-preference){
+    /* open state reads as attached to the prompt, not a popup */
+    .suggest:not([hidden]){ animation:suggest-in .14s cubic-bezier(.16,1,.3,1); }
+}
+@keyframes suggest-in{ from{ opacity:0; transform:translateY(4px); } to{ opacity:1; transform:none; } }
 
 @media (prefers-reduced-motion:reduce){ .window,.status::before{animation:none;} }
 
@@ -379,8 +407,9 @@ main{
 
     <div class="screen" id="screen" tabindex="0" aria-live="polite"></div>
     <div class="inputrow">
+        <div class="suggest" id="suggest" role="listbox" aria-label="Command suggestions" hidden></div>
         <span class="sym">$</span>
-        <input id="cmdInput" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="type a command, try help" aria-label="Terminal command input">
+        <input id="cmdInput" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="type a command, try skills or help" aria-label="Terminal command input" aria-controls="suggest" aria-expanded="false" aria-autocomplete="list">
         <span class="hint">Tab / ↑↓</span>
     </div>
 
@@ -395,6 +424,7 @@ main{
             <a href="https://github.com/knight-byte" target="_blank" rel="noopener" aria-label="GitHub"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2C6.477 2 2 6.484 2 12.021c0 4.428 2.865 8.184 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.021C22 6.484 17.522 2 12 2z"/></svg></a>
             <a href="https://in.linkedin.com/in/abunachar" target="_blank" rel="noopener" aria-label="LinkedIn"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a-2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a>
             <a href="https://t.me/abunachar" target="_blank" rel="noopener" aria-label="Telegram"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M11.944 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0a12 12 0 00-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 01.171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg></a>
+            <a href="/skills/" aria-label="Skill graph" title="Skill graph"><svg class="icon" viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M200,152a31.84,31.84,0,0,0-19.53,6.68l-23.11-18A31.65,31.65,0,0,0,160,128c0-.74,0-1.48-.08-2.21l13.23-4.41A32,32,0,1,0,168,104c0,.74,0,1.48.08,2.21l-13.23,4.41A32,32,0,0,0,128,96a32.59,32.59,0,0,0-5.27.44L115.89,81A32,32,0,1,0,96,88a32.59,32.59,0,0,0,5.27-.44l6.84,15.4a31.92,31.92,0,0,0-8.57,39.64L73.83,165.44a32.06,32.06,0,1,0,10.63,12l25.71-22.84a31.91,31.91,0,0,0,37.36-1.24l23.11,18A31.65,31.65,0,0,0,168,184a32,32,0,1,0,32-32Zm0-64a16,16,0,1,1-16,16A16,16,0,0,1,200,88ZM80,56A16,16,0,1,1,96,72,16,16,0,0,1,80,56ZM56,208a16,16,0,1,1,16-16A16,16,0,0,1,56,208Zm56-80a16,16,0,1,1,16,16A16,16,0,0,1,112,128Zm88,72a16,16,0,1,1,16-16A16,16,0,0,1,200,200Z"/></svg></a>
             <a href="mailto:hello@abunachar.com" aria-label="Email"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></a>
         </div>
         <div class="gui-footer">abunachar.com</div>
@@ -462,38 +492,37 @@ function printStatus(){
     wrap.textContent = 'all systems provisioned, no drift detected';
     screen.appendChild(wrap);
 }
-function bar(label, pct, color){
-    addLine(
-        `<div class="bar-row"><span style="color:var(--muted)">${label}</span>` +
-        `<div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div>` +
-        `<span style="color:${color}">${pct}%</span></div>`
-    );
-}
 
 /* ---------- command history ---------- */
 let history = [];
 let histIndex = -1;
-const COMMAND_LIST = ['help','whoami','about','security','cloudarch','skills','links','github','linkedin','telegram','email','uptime','neofetch','ls','gui','clear','sudo'];
+const COMMAND_HELP = {
+    help:      'list available commands',
+    whoami:    'who runs this terminal',
+    about:     'what abunachar does',
+    security:  'how I approach DevSecOps',
+    cloudarch: 'a quick look at pipeline architecture',
+    skills:    'interactive skill graph (/skills)',
+    links:     'all social / contact links',
+    github:    'open github profile',
+    linkedin:  'open linkedin profile',
+    telegram:  'open telegram',
+    email:     'get my email address',
+    neofetch:  'system info card',
+    uptime:    'how long this has been running',
+    gui:       'switch to the simple view',
+    clear:     'clear the screen'
+};
+const COMMAND_LIST = [...Object.keys(COMMAND_HELP), 'ls', 'sudo'];
 
 const COMMANDS = {
     help(){
         addLine('available commands:', 'muted');
-        addLine('  whoami        who runs this terminal');
-        addLine('  about         what abunachar does');
-        addLine('  security      how I approach DevSecOps');
-        addLine('  cloudarch     a quick look at pipeline architecture');
-        addLine('  skills        toolset breakdown');
-        addLine('  links         all social / contact links');
-        addLine('  github        open github profile');
-        addLine('  linkedin      open linkedin profile');
-        addLine('  telegram      open telegram');
-        addLine('  email         get my email address');
-        addLine('  neofetch      system info card');
-        addLine('  uptime        how long this has been running');
-        addLine('  gui           switch to the simple view');
-        addLine('  clear         clear the screen');
+        for(const [name, desc] of Object.entries(COMMAND_HELP)){
+            if(name !== 'help') addLine('  ' + name.padEnd(14) + desc);
+        }
         addBreak();
-        addLine('tip: ↑ / ↓ for history, Tab to autocomplete', 'muted');
+        addLine('tip: suggestions appear as you type. ↑ / ↓ to pick, Tab to complete', 'muted');
     },
     whoami(){ printIdentity(); printStatus(); },
     about(){
@@ -531,11 +560,14 @@ const COMMANDS = {
     skills(){
         addLine('$ cat toolset.json', 'green');
         addBreak();
-        bar('automation',  90, 'var(--ansi-green)');
-        bar('security',     82, 'var(--ansi-yellow)');
-        bar('cloud',         78, 'var(--ansi-blue)');
-        bar('python',        88, 'var(--ansi-magenta)');
-        bar('patience',      40, 'var(--ansi-red)');
+        addLine('▸ cloud & iac      gcp, aws, terraform, helm', 'cyan');
+        addLine('▸ k8s & ci/cd      kubernetes, istio, argocd, github actions', 'cyan');
+        addLine('▸ sre              slos, incident/rca, prometheus, grafana', 'cyan');
+        addLine('▸ security         sast/dast, opa, vapt, soc 2', 'cyan');
+        addLine('▸ code & data      python, rails, graphql, postgres, redis', 'cyan');
+        addBreak();
+        addLine('opening /skills (the full graph) …', 'blue');
+        setTimeout(() => { window.location.href = '/skills/'; }, 900);
     },
     links(){
         addLine('<span class="linklist">' + ICON.github + ' <a href="' + LINKS.github.url + '" target="_blank" rel="noopener">' + LINKS.github.label + '</a></span>', 'cyan');
@@ -546,7 +578,7 @@ const COMMANDS = {
     github(){ addLine('opening ' + LINKS.github.label + ' …', 'blue'); window.open(LINKS.github.url, '_blank', 'noopener'); },
     linkedin(){ addLine('opening ' + LINKS.linkedin.label + ' …', 'blue'); window.open(LINKS.linkedin.url, '_blank', 'noopener'); },
     telegram(){ addLine('opening ' + LINKS.telegram.label + ' …', 'blue'); window.open(LINKS.telegram.url, '_blank', 'noopener'); },
-    email(){ addLine(LINKS.email.label + ' — copy-paste works fine, no form needed.', 'cyan'); window.location.href = LINKS.email.url; },
+    email(){ addLine(LINKS.email.label + '. copy-paste works fine, no form needed.', 'cyan'); window.location.href = LINKS.email.url; },
     uptime(){ addLine("uptime: building things that don't page you", 'yellow'); },
     neofetch(){
         const wrap = document.createElement('div');
@@ -569,7 +601,7 @@ const COMMANDS = {
 };
 
 function runCommand(raw){
-    const cmd = raw.trim().toLowerCase();
+    const cmd = raw.trim().toLowerCase().replace(/^\/+/, '');
     const echo = document.createElement('div');
     echo.className = 'promptline';
     echo.innerHTML = '<span class="sym">$</span><span class="typed"></span>';
@@ -579,28 +611,90 @@ function runCommand(raw){
     if(cmd !== ''){ history.push(raw); histIndex = history.length; }
     if(cmd === ''){ screen.scrollTop = screen.scrollHeight; return; }
     if(COMMANDS[cmd]){ COMMANDS[cmd](); }
-    else { addLine('command not found: ' + cmd + " — try 'help'", 'red'); }
+    else { addLine('command not found: ' + cmd + ". try 'help'", 'red'); }
     addBreak();
     screen.scrollTop = screen.scrollHeight;
 }
 
+/* ---------- suggestions while typing ---------- */
+const suggestBox = document.getElementById('suggest');
+let suggestions = [];
+let suggestIndex = -1;
+let noMatch = '';
+
+function matchCommands(raw){
+    const q = raw.trim().toLowerCase().replace(/^\/+/, '');
+    if(!q) return [];
+    const names = Object.keys(COMMAND_HELP);
+    const prefix = names.filter(c => c.startsWith(q));
+    // fuzzier matches only once there's enough typed to mean something
+    const contains = names.filter(c => !c.startsWith(q) &&
+        ((q.length >= 2 && c.includes(q)) || (q.length >= 3 && COMMAND_HELP[c].includes(q))));
+    const found = [...prefix, ...contains];
+    return found.length === 1 && found[0] === q ? [] : found.slice(0, 6);
+}
+function renderSuggestions(){
+    suggestions = matchCommands(input.value);
+    suggestIndex = -1;
+    const q = input.value.trim().toLowerCase().replace(/^\/+/, '');
+    noMatch = q && !suggestions.length && !COMMAND_LIST.includes(q) ? q : '';
+    drawSuggestions();
+}
+function drawSuggestions(){
+    suggestBox.innerHTML = '';
+    suggestBox.hidden = suggestions.length === 0 && !noMatch;
+    input.setAttribute('aria-expanded', String(suggestions.length > 0));
+    if(noMatch){
+        const empty = document.createElement('div');
+        empty.className = 'suggest-empty';
+        empty.innerHTML = 'no command matches "<span></span>". type <b>help</b> for the full list.';
+        empty.querySelector('span').textContent = noMatch;
+        suggestBox.appendChild(empty);
+    }
+    suggestions.forEach((name, idx) => {
+        const item = document.createElement('button');
+        item.type = 'button';
+        item.className = 'suggest-item' + (idx === suggestIndex ? ' active' : '');
+        item.setAttribute('role', 'option');
+        item.setAttribute('aria-selected', String(idx === suggestIndex));
+        item.innerHTML = '<span class="name"></span><span class="desc"></span>';
+        item.querySelector('.name').textContent = name;
+        item.querySelector('.desc').textContent = COMMAND_HELP[name];
+        item.addEventListener('mousedown', (e) => e.preventDefault());
+        item.addEventListener('click', () => { closeSuggestions(); input.value = ''; runCommand(name); input.focus(); });
+        suggestBox.appendChild(item);
+    });
+}
+function closeSuggestions(){ suggestions = []; suggestIndex = -1; noMatch = ''; drawSuggestions(); }
+
+input.addEventListener('input', renderSuggestions);
+input.addEventListener('blur', () => setTimeout(closeSuggestions, 100));
+
 input.addEventListener('keydown', (e) => {
+    const open = suggestions.length > 0;
     if(e.key === 'Enter'){
-        const val = input.value; input.value = ''; runCommand(val);
+        const val = open && suggestIndex >= 0 ? suggestions[suggestIndex] : input.value;
+        input.value = ''; closeSuggestions(); runCommand(val);
     } else if(e.key === 'ArrowUp'){
         e.preventDefault();
-        if(histIndex > 0){ histIndex--; input.value = history[histIndex] || ''; }
+        if(open){ suggestIndex = suggestIndex <= 0 ? suggestions.length - 1 : suggestIndex - 1; drawSuggestions(); }
+        else if(histIndex > 0){ histIndex--; input.value = history[histIndex] || ''; }
     } else if(e.key === 'ArrowDown'){
         e.preventDefault();
-        if(histIndex < history.length - 1){ histIndex++; input.value = history[histIndex] || ''; }
+        if(open){ suggestIndex = (suggestIndex + 1) % suggestions.length; drawSuggestions(); }
+        else if(histIndex < history.length - 1){ histIndex++; input.value = history[histIndex] || ''; }
         else { histIndex = history.length; input.value = ''; }
     } else if(e.key === 'Tab'){
         e.preventDefault();
-        const partial = input.value.trim().toLowerCase();
-        if(partial){
-            const match = COMMAND_LIST.find(c => c.startsWith(partial));
+        if(open){ input.value = suggestions[Math.max(suggestIndex, 0)]; closeSuggestions(); }
+        else {
+            const partial = input.value.trim().toLowerCase();
+            const match = partial && COMMAND_LIST.find(c => c.startsWith(partial));
             if(match) input.value = match;
         }
+    } else if(e.key === 'Escape' && !suggestBox.hidden){
+        e.preventDefault();
+        closeSuggestions();
     }
 });
 win.addEventListener('click', (e) => {
@@ -609,7 +703,7 @@ win.addEventListener('click', (e) => {
 });
 
 /* ---------- drag by titlebar + maximize ---------- */
-const titlebar = win.querySelector('.titlebar');
+const bar = win.querySelector('.titlebar');
 const btnMax = document.getElementById('btnMax');
 let dx = 0, dy = 0;
 function toggleMax(){
@@ -618,19 +712,19 @@ function toggleMax(){
     btnMax.title = max ? 'Restore' : 'Maximize';
 }
 btnMax.addEventListener('click', toggleMax);
-titlebar.addEventListener('dblclick', (e) => { if(!e.target.closest('button')) toggleMax(); });
-titlebar.addEventListener('pointerdown', (e) => {
+bar.addEventListener('dblclick', (e) => { if(!e.target.closest('button')) toggleMax(); });
+bar.addEventListener('pointerdown', (e) => {
     if(e.button !== 0 || e.target.closest('button') || win.classList.contains('max') || matchMedia('(max-width:620px)').matches) return;
     // clamp so the whole window stays on screen
     const r = win.getBoundingClientRect(), sx = e.clientX - dx, sy = e.clientY - dy;
     const minX = dx - r.left, maxX = dx + innerWidth - r.right, minY = dy - r.top, maxY = dy + innerHeight - r.bottom;
-    titlebar.setPointerCapture(e.pointerId);
-    titlebar.onpointermove = (m) => {
+    bar.setPointerCapture(e.pointerId);
+    bar.onpointermove = (m) => {
         dx = Math.min(maxX, Math.max(minX, m.clientX - sx));
         dy = Math.min(maxY, Math.max(minY, m.clientY - sy));
         win.style.translate = dx + 'px ' + dy + 'px';
     };
-    titlebar.onpointerup = () => { titlebar.onpointermove = null; };
+    bar.onpointerup = () => { bar.onpointermove = null; };
 });
 
 /* ---------- boot sequence ---------- */
