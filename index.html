@@ -609,7 +609,7 @@ win.addEventListener('click', (e) => {
 });
 
 /* ---------- drag by titlebar + maximize ---------- */
-const bar = win.querySelector('.titlebar');
+const titlebar = win.querySelector('.titlebar');
 const btnMax = document.getElementById('btnMax');
 let dx = 0, dy = 0;
 function toggleMax(){
@@ -618,19 +618,19 @@ function toggleMax(){
     btnMax.title = max ? 'Restore' : 'Maximize';
 }
 btnMax.addEventListener('click', toggleMax);
-bar.addEventListener('dblclick', (e) => { if(!e.target.closest('button')) toggleMax(); });
-bar.addEventListener('pointerdown', (e) => {
+titlebar.addEventListener('dblclick', (e) => { if(!e.target.closest('button')) toggleMax(); });
+titlebar.addEventListener('pointerdown', (e) => {
     if(e.button !== 0 || e.target.closest('button') || win.classList.contains('max') || matchMedia('(max-width:620px)').matches) return;
     // clamp so the whole window stays on screen
     const r = win.getBoundingClientRect(), sx = e.clientX - dx, sy = e.clientY - dy;
     const minX = dx - r.left, maxX = dx + innerWidth - r.right, minY = dy - r.top, maxY = dy + innerHeight - r.bottom;
-    bar.setPointerCapture(e.pointerId);
-    bar.onpointermove = (m) => {
+    titlebar.setPointerCapture(e.pointerId);
+    titlebar.onpointermove = (m) => {
         dx = Math.min(maxX, Math.max(minX, m.clientX - sx));
         dy = Math.min(maxY, Math.max(minY, m.clientY - sy));
         win.style.translate = dx + 'px ' + dy + 'px';
     };
-    bar.onpointerup = () => { bar.onpointermove = null; };
+    titlebar.onpointerup = () => { titlebar.onpointermove = null; };
 });
 
 /* ---------- boot sequence ---------- */
@@ -660,7 +660,7 @@ function playBoot(){
         printIdentity();
         printStatus();
         addBreak();
-        addLine("type <span style=\"color:var(--ansi-green)\">help</span> to see what's here, or <span style=\"color:var(--ansi-magenta)\">gui</span> for the simple view.", 'muted');
+        addLine('type <span style="color:var(--ansi-green)">help</span> for commands, or <span style="color:var(--ansi-magenta)">gui</span> for the simple view', 'muted');
         addBreak();
         input.focus();
         return;
