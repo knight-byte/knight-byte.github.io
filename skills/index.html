@@ -23,6 +23,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Geist:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="/desktop.css">
 <style>
 :root{
     /* same tokens as the terminal on the home page (index.html :root) */
@@ -62,24 +63,25 @@
 html,body{ height:100%; }
 body{
     font-family:var(--mono);
-    background:var(--bg);
+    background:var(--bg) url(/wallpaper.svg) center/cover no-repeat;
     color:var(--fg);
     display:flex;
     flex-direction:column;
     min-height:100dvh;
+    padding:40px 20px 80px; /* clear menubar + dock (/desktop.css) */
     overflow:hidden;
 }
-/* same scanline texture as the home page terminal */
-body::before{
-    content:"";
-    position:fixed;
-    inset:0;
-    pointer-events:none;
-    background:repeating-linear-gradient(
-        0deg, rgba(255,255,255,.012), rgba(255,255,255,.012) 1px,
-        transparent 1px, transparent 3px
-    );
+
+/* ============ WINDOW (same shell as the home page terminal) ============ */
+.window{
+    flex:1; min-height:0; display:flex; flex-direction:column; overflow:hidden;
+    border-radius:12px; border:1px solid var(--border); background:var(--term);
+    box-shadow:0 30px 60px -20px rgba(0,0,0,.6);
+    transition:transform .4s cubic-bezier(.4,0,.2,1), opacity .4s, visibility 0s;
 }
+.window.min{ transform:translateY(60vh) scale(.08); opacity:0; visibility:hidden; transition:transform .4s cubic-bezier(.4,0,.2,1), opacity .4s, visibility 0s .4s; }
+.window.max{ position:fixed; inset:28px 0 0; z-index:10; border:0; border-radius:0; }
+@media (prefers-reduced-motion:reduce){ .window,.window.min{ transition:none; transform:none; } }
 :focus-visible{ outline:1px solid var(--accent); outline-offset:2px; }
 
 /* ============ TITLEBAR ============ */
@@ -88,10 +90,10 @@ body::before{
     padding:10px 16px; background:var(--chrome);
     border-bottom:1px solid var(--border); flex-shrink:0;
 }
-.dot{ width:11px; height:11px; border-radius:50%; }
-.dot:nth-child(1){ background:#e06c75; opacity:.55; }
-.dot:nth-child(2){ background:#e0af68; opacity:.55; }
-.dot:nth-child(3){ background:#9ece6a; opacity:.55; }
+.dot{ width:12px; height:12px; border-radius:50%; border:0; padding:0; cursor:pointer; box-shadow:inset 0 0 0 .5px rgba(0,0,0,.25); }
+.dot:nth-child(1){ background:#ff5f57; }
+.dot:nth-child(2){ background:#febc2e; }
+.dot:nth-child(3){ background:#28c840; }
 .path{ margin-left:6px; font-size:.72rem; color:var(--muted); }
 .back{
     margin-left:10px; font-size:.72rem; color:var(--accent); text-decoration:none;
@@ -269,6 +271,7 @@ svg.focus .link.lit{ stroke:color-mix(in srgb, var(--c, var(--fg)) 90%, transpar
 @keyframes panel-in{ from{ opacity:0; transform:translateX(8px); } to{ opacity:1; transform:none; } }
 
 @media (max-width:640px){
+    body{ padding:36px 6px 64px; }
     .path{ display:none; }
     .search{ flex:1 1 100%; order:5; margin-left:0; min-width:0; }
     .search input{ flex:1; width:auto; min-width:0; }
@@ -285,7 +288,7 @@ svg.focus .link.lit{ stroke:color-mix(in srgb, var(--c, var(--fg)) 90%, transpar
 }
 </style>
 </head>
-<body>
+<body data-app="Skill Graph" data-running="skills">
 
 <noscript>
   <main style="max-width:640px;margin:40px auto;padding:0 20px;line-height:1.7;">
@@ -300,8 +303,9 @@ svg.focus .link.lit{ stroke:color-mix(in srgb, var(--c, var(--fg)) 90%, transpar
   </main>
 </noscript>
 
+<div class="window" id="window">
 <header class="titlebar">
-    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+    <button type="button" class="dot" id="btnClose" aria-label="Close window, back home" title="Close"></button><button type="button" class="dot" id="btnMin" aria-label="Minimize window" title="Minimize"></button><button type="button" class="dot" id="btnMax" aria-label="Maximize window" aria-pressed="false" title="Maximize"></button>
     <span class="path">guest@abunachar.com: ~/skills</span>
     <a class="back" href="/">← cd ~</a>
     <label class="search" id="searchBox">
@@ -321,6 +325,7 @@ svg.focus .link.lit{ stroke:color-mix(in srgb, var(--c, var(--fg)) 90%, transpar
     <div class="legend" id="legend" role="group" aria-label="Highlight a skill area"></div>
     <aside class="panel" id="panel" hidden aria-live="polite"></aside>
 </main>
+</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script>
 /* ---------- data (from the resume) ---------- */
@@ -1018,6 +1023,19 @@ function renderFallback(){
 
 if(window.d3) initGraph();
 else renderFallback();
+</script>
+<script src="/desktop.js"></script>
+<script>
+/* ---------- window buttons: close goes home, minimize to dock, maximize ---------- */
+const win = document.getElementById('window');
+document.getElementById('btnClose').addEventListener('click', () => { location.href = '/'; });
+document.getElementById('btnMin').addEventListener('click', () => win.classList.add('min'));
+document.getElementById('btnMax').addEventListener('click', (e) => {
+    e.currentTarget.setAttribute('aria-pressed', String(win.classList.toggle('max')));
+    dispatchEvent(new Event('resize')); // graph re-centres on the new size
+});
+// the Skill Graph dock icon brings the minimized window back instead of reloading
+document.querySelector('#dock .i-skills').addEventListener('click', (e) => { e.preventDefault(); win.classList.remove('min'); });
 </script>
 </body>
 </html>

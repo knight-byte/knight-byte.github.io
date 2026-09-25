@@ -1,0 +1,66 @@
+/* shared macOS chrome for every page: menubar + dock (markup injected by /desktop.js) */
+.menubar{
+    position:fixed; top:0; left:0; right:0; z-index:20; height:28px;
+    display:flex; align-items:center; gap:18px; padding:0 14px;
+    font:500 13px -apple-system,BlinkMacSystemFont,'Inter',sans-serif; color:#fff;
+    text-shadow:0 1px 6px rgba(0,0,0,.35); user-select:none;
+}
+.menubar .logo{ width:16px; height:16px; border-radius:4px; display:grid; place-items:center; background:var(--ansi-cyan); color:#0c0d10; font:700 10px 'JetBrains Mono',monospace; text-shadow:none; }
+.menubar .menus{ display:flex; gap:18px; }
+.menubar .menus span{ opacity:.9; }
+.menubar .tray{ margin-left:auto; display:flex; gap:16px; align-items:center; }
+.bat{ width:22px; height:11px; border:1px solid #fff; border-radius:3px; padding:1px; }
+.bat::before{ content:""; display:block; height:100%; width:80%; background:#fff; border-radius:1px; }
+
+.dock{
+    position:fixed; bottom:6px; left:50%; translate:-50% 0; z-index:20; width:max-content;
+    display:flex; align-items:flex-end; gap:14px; padding:6px 12px 8px; border-radius:20px;
+    background:rgba(58,58,62,.42); backdrop-filter:blur(34px) saturate(1.8); -webkit-backdrop-filter:blur(34px) saturate(1.8);
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.16), 0 0 0 .5px rgba(0,0,0,.5), 0 12px 32px rgba(0,0,0,.35);
+}
+.dock .app{
+    --sz:44px; width:var(--sz); height:var(--sz); position:relative; flex-shrink:0;
+    display:grid; place-items:center; border-radius:23%; color:#fff; text-decoration:none;
+    box-shadow:inset 0 0 0 .5px rgba(255,255,255,.18), 0 2px 5px rgba(0,0,0,.35);
+    transition:width .12s ease-out, height .12s ease-out;
+}
+.dock .app .icon{ width:calc(var(--sz) * .56); height:calc(var(--sz) * .56); }
+.dock .app img{ width:100%; height:100%; border-radius:inherit; object-fit:cover; }
+.dock button.app{ border:0; padding:0; cursor:pointer; font:inherit; }
+.dock .app:focus-visible{ outline:2px solid #fff; outline-offset:3px; }
+.i-term{ background:linear-gradient(#34363b,#1b1c1f); }
+.i-term .p{ position:absolute; left:15%; top:12%; font:500 calc(var(--sz) * .3)/1 'JetBrains Mono',monospace; }
+.i-skills{ background:linear-gradient(160deg,#8be3c9,#23806a); }
+.i-gh{ background:linear-gradient(#2b2f36,#0d1117); }
+.i-li{ background:linear-gradient(#1b7fe0,#0a58b0); }
+.i-li .icon{ width:calc(var(--sz) * .5); height:calc(var(--sz) * .5); }
+.i-tg{ background:linear-gradient(#3fbdf4,#1b8fd0); }
+.i-tg .icon{ translate:-4% 4%; }
+.i-mail{ background:linear-gradient(#5ab8ff,#1a6fe6); }
+.dock .badge{
+    position:absolute; top:-4px; right:-4px; min-width:17px; height:17px; padding:0 4px; border-radius:99px;
+    background:#ff3b30; color:#fff; font:600 11px/17px -apple-system,BlinkMacSystemFont,'Inter',sans-serif; text-align:center;
+    box-shadow:0 1px 3px rgba(0,0,0,.4);
+}
+/* running indicator */
+.dock .app.on::after{ content:""; position:absolute; bottom:-7px; left:50%; translate:-50% 0; width:4px; height:4px; border-radius:50%; background:rgba(255,255,255,.75); }
+/* tooltip */
+.dock .app::before{
+    content:attr(aria-label); position:absolute; bottom:calc(100% + 16px); left:50%; translate:-50% 4px;
+    padding:6px 13px; border-radius:10px; white-space:nowrap; font:400 13px -apple-system,BlinkMacSystemFont,'Inter',sans-serif; color:#fff;
+    background:rgba(28,28,30,.88); box-shadow:inset 0 0 0 1px rgba(255,255,255,.14), 0 6px 16px rgba(0,0,0,.35);
+    opacity:0; pointer-events:none; transition:opacity .1s, translate .1s;
+}
+.dock .app:hover::before,.dock .app:focus-visible::before{ opacity:1; translate:-50% 0; }
+.dock .app.bounce{ animation:bounce .9s cubic-bezier(.3,0,.3,1); }
+@keyframes bounce{ 0%,50%,100%{ transform:none; } 25%,75%{ transform:translateY(-22px); } }
+.dock .sep{ width:1px; height:38px; background:rgba(255,255,255,.22); margin-bottom:3px; align-self:center; }
+@media (max-width:620px){
+    .menubar .menus{ display:none; }
+    .dock{ gap:8px; padding:5px 8px 7px; }
+    .dock .app{ --sz:36px; }
+    .dock .sep{ height:30px; }
+}
+@media (prefers-reduced-motion:reduce){
+    .dock .app{ transition:none; } .dock .app.bounce{ animation:none; }
+}
