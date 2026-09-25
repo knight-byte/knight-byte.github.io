@@ -260,7 +260,8 @@ button.dot:focus-visible{ outline:2px solid var(--fg); outline-offset:2px; }
 .ic .t .p{ position:absolute; left:10px; top:8px; font:500 17px/1 'JetBrains Mono',monospace; }
 .ic .badge{ position:absolute; top:-6px; right:-6px; min-width:22px; height:22px; padding:0 6px; border-radius:99px; background:#ff3b30; font:600 13px/22px -apple-system,'Inter',sans-serif; text-align:center; }
 .sb-search{ position:fixed; bottom:124px; left:50%; translate:-50% 0; padding:6px 14px; border-radius:99px; font-size:13px; font-weight:600; }
-.sb-dock{ position:fixed; left:12px; right:12px; bottom:16px; height:92px; border-radius:36px; display:flex; justify-content:space-around; align-items:center; }
+.sb-dock{ position:fixed; left:10px; right:10px; bottom:16px; height:88px; border-radius:34px; display:flex; justify-content:space-evenly; align-items:center; }
+.sb-dock .ic .t{ width:56px; height:56px; border-radius:13px; }
 .sb-dock .ic > span:last-child{ display:none; }
 
 /* ============ LOCK SCREEN (menubar + dock live in /desktop.css) ============ */
@@ -450,7 +451,6 @@ main{
     <div class="sb-grid">
         <button type="button" class="ic" data-open="gui"><span class="t"><img src="avatar.png" alt="" width="60" height="60"></span><span>Profile</span></button>
         <a class="ic" href="/skills/"><span class="t i-skills" data-from="i-skills"></span><span>Skills</span></a>
-        <a class="ic" href="https://in.linkedin.com/in/abunachar" target="_blank" rel="noopener"><span class="t i-li" data-from="i-li"></span><span>LinkedIn</span></a>
     </div>
     <div class="sb-search glass" aria-hidden="true">Search</div>
     <div class="sb-dock glass">
@@ -458,6 +458,7 @@ main{
         <a class="ic" href="https://t.me/abunachar" target="_blank" rel="noopener"><span class="t i-tg" data-from="i-tg"></span><span>Telegram</span></a>
         <a class="ic" href="mailto:hello@abunachar.com"><span class="t i-mail" data-from="i-mail"></span><span>Mail</span></a>
         <a class="ic" href="https://github.com/knight-byte" target="_blank" rel="noopener"><span class="t i-gh" data-from="i-gh"></span><span>GitHub</span></a>
+        <a class="ic" href="https://in.linkedin.com/in/abunachar" target="_blank" rel="noopener"><span class="t i-li" data-from="i-li"></span><span>LinkedIn</span></a>
     </div>
 </div>
 
