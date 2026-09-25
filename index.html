@@ -132,6 +132,17 @@ body::before{
 .titlebar .dot:nth-child(1){ background:#e06c75; opacity:.55; }
 .titlebar .dot:nth-child(2){ background:#e0af68; opacity:.55; }
 .titlebar .dot:nth-child(3){ background:#9ece6a; opacity:.55; }
+.titlebar{ cursor:grab; user-select:none; touch-action:none; }
+.titlebar:active{ cursor:grabbing; }
+button.dot{ border:0; padding:0; cursor:pointer; }
+button.dot:hover,button.dot:focus-visible{ opacity:1; outline:none; }
+/* maximized: pinned to viewport edges, drag offset ignored */
+.window.max{
+    position:fixed; inset:0; z-index:10;
+    width:auto; height:auto; max-width:none; max-height:none; min-height:0;
+    border:0; border-radius:0; translate:none !important;
+}
+.window.max .titlebar{ cursor:default; }
 .titlebar span.path{ margin-left:6px; font-size:.72rem; color:var(--muted); letter-spacing:.02em; }
 
 .toggle{
@@ -358,7 +369,7 @@ main{
 <main>
 <div class="window" id="window" role="application" aria-label="Interactive profile">
     <div class="titlebar">
-        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <span class="dot"></span><span class="dot"></span><button type="button" class="dot" id="btnMax" aria-label="Maximize window" aria-pressed="false" title="Maximize"></button>
         <span class="path">guest@abunachar.com: ~</span>
         <div class="toggle" role="group" aria-label="View mode">
             <button id="btnTerm" class="active" aria-pressed="true">Terminal</button>
@@ -595,6 +606,31 @@ input.addEventListener('keydown', (e) => {
 win.addEventListener('click', (e) => {
     if(win.classList.contains('gui-mode')) return;
     if(e.target.tagName !== 'A' && e.target.tagName !== 'BUTTON') input.focus();
+});
+
+/* ---------- drag by titlebar + maximize ---------- */
+const bar = win.querySelector('.titlebar');
+const btnMax = document.getElementById('btnMax');
+let dx = 0, dy = 0;
+function toggleMax(){
+    const max = win.classList.toggle('max');
+    btnMax.setAttribute('aria-pressed', String(max));
+    btnMax.title = max ? 'Restore' : 'Maximize';
+}
+btnMax.addEventListener('click', toggleMax);
+bar.addEventListener('dblclick', (e) => { if(!e.target.closest('button')) toggleMax(); });
+bar.addEventListener('pointerdown', (e) => {
+    if(e.button !== 0 || e.target.closest('button') || win.classList.contains('max') || matchMedia('(max-width:620px)').matches) return;
+    // clamp so the whole window stays on screen
+    const r = win.getBoundingClientRect(), sx = e.clientX - dx, sy = e.clientY - dy;
+    const minX = dx - r.left, maxX = dx + innerWidth - r.right, minY = dy - r.top, maxY = dy + innerHeight - r.bottom;
+    bar.setPointerCapture(e.pointerId);
+    bar.onpointermove = (m) => {
+        dx = Math.min(maxX, Math.max(minX, m.clientX - sx));
+        dy = Math.min(maxY, Math.max(minY, m.clientY - sy));
+        win.style.translate = dx + 'px ' + dy + 'px';
+    };
+    bar.onpointerup = () => { bar.onpointermove = null; };
 });
 
 /* ---------- boot sequence ---------- */
